@@ -1,8 +1,8 @@
 ---
 ---
 
-<!-- Audio Gateway Overlay -->
-<div id="audio-overlay" class="fixed inset-0 bg-[#030303] flex flex-col items-center justify-center z-[200]">
+<!-- Audio Gateway Overlay - z-index must be HIGHEST of all layers -->
+<div id="audio-overlay" class="fixed inset-0 bg-[#030303] flex flex-col items-center justify-center" style="z-index: 99999;">
   <!-- Animated background text -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03]">
     <div class="absolute top-1/4 left-0 text-[25vw] font-black uppercase whitespace-nowrap leading-none tracking-tighter animate-slide-left">MOMENTUM MOMENTUM MOMENTUM</div>
@@ -12,16 +12,19 @@
   <div class="relative z-10 text-center">
     <p class="text-white/30 text-[10px] uppercase tracking-[0.4em] mb-12">Momentum Design Agentur / 2026</p>
     
-    <button id="unmute-btn" class="group relative cursor-pointer overflow-hidden px-16 py-8 border border-white/20 hover:border-white/60 transition-colors duration-500">
+    <!-- The button itself must have pointer-events: auto explicitly -->
+    <button 
+      id="unmute-btn" 
+      style="position:relative; z-index: 100000; cursor: pointer; pointer-events: auto;"
+      class="group overflow-hidden px-16 py-8 border border-white/20 hover:border-white/60 transition-colors duration-500"
+    >
       <span class="relative z-10 text-white text-2xl font-light tracking-[0.3em] uppercase group-hover:tracking-[0.5em] transition-all duration-700">EINTRETEN</span>
-      <!-- Hover fill -->
-      <div class="absolute inset-0 bg-white/5 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+      <div class="absolute inset-0 bg-white/5 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left pointer-events-none"></div>
     </button>
     
     <p class="text-white/25 mt-8 text-[9px] tracking-[0.3em] uppercase">Am besten mit Audio-Eindrücken erleben</p>
     
-    <!-- Pulsing indicator -->
-    <div class="mt-16 flex items-center gap-3">
+    <div class="mt-16 flex items-center justify-center gap-3">
       <div class="w-1 h-1 rounded-full bg-accent animate-ping"></div>
       <span class="text-white/20 text-[8px] uppercase tracking-widest">Ton wird aktiviert</span>
     </div>
@@ -36,128 +39,164 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const overlay = document.getElementById('audio-overlay');
-  const unmuteBtn = document.getElementById('unmute-btn');
+  const overlay = document.getElementById('audio-overlay') as HTMLElement;
+  const unmuteBtn = document.getElementById('unmute-btn') as HTMLButtonElement;
 
-  // ─── Audio Context + Nodes ──────────────────────────────────────
+  // ─── Web Audio API context (created on user gesture) ────────────
   let audioCtx: AudioContext | null = null;
-  let masterGain: GainNode | null = null;
   let lowpassFilter: BiquadFilterNode | null = null;
   let pannerNode: StereoPannerNode | null = null;
 
-  // ─── Howler sounds ──────────────────────────────────────────────
-  let hoverSound: Howl;
-  let clickSound: Howl;
-  let ambientSound: Howl;
+  // ─── Howler sounds ───────────────────────────────────────────────
+  let hoverSound: Howl | null = null;
+  let clickSound: Howl | null = null;
+  let ambientSound: Howl | null = null;
 
-  function initSpatialAudio() {
-    // Web Audio API for advanced spatial effects
-    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.7;
+  function initAudio() {
+    try {
+      // Create AudioContext fresh on user click (required by browsers)
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-    // Lowpass filter for scroll-driven muffling
-    lowpassFilter = audioCtx.createBiquadFilter();
-    lowpassFilter.type = 'lowpass';
-    lowpassFilter.frequency.value = 20000; // Start fully open
-    lowpassFilter.Q.value = 1;
-
-    // Stereo panner for mouse-driven spatial audio
-    pannerNode = audioCtx.createStereoPanner();
-    pannerNode.pan.value = 0;
-
-    // Chain: panner → lowpass → gain → output
-    pannerNode.connect(lowpassFilter);
-    lowpassFilter.connect(masterGain);
-    masterGain.connect(audioCtx.destination);
-
-    // Connect Howler to the Web Audio API graph
-    Howler.ctx = audioCtx;
-    Howler.masterGain.connect(pannerNode);
-    Howler.masterGain.disconnect(audioCtx.destination); // Remove direct connection
-
-    // ─── Spatial Panning based on mouse ──────────────────────────
-    engine.subscribe(() => {
-      if (!audioCtx || !pannerNode) return;
-      const normalizedX = (engine.mouse.lx / window.innerWidth) * 2 - 1; // -1 to 1
-      pannerNode.pan.setTargetAtTime(normalizedX * 0.4, audioCtx.currentTime, 0.3);
-    });
-
-    // ─── Scroll-driven soundscapes (Lowpass filter) ───────────────
-    ScrollTrigger.create({
-      start: 0,
-      end: 'max',
-      onUpdate: (self) => {
-        if (!lowpassFilter || !audioCtx) return;
-        // 0% scroll = 20000hz open, 100% scroll = 800hz muffled → back to clear
-        const p = self.progress;
-        // Creates a "wave" of muffling as you scroll
-        const freq = p < 0.5 
-          ? 20000 - (p * 2) * 18000  // Open → muffled (0→50%)
-          : 2000 + ((p - 0.5) * 2) * 18000; // Muffled → clear (50→100%)
-        lowpassFilter.frequency.setTargetAtTime(
-          Math.max(400, freq), 
-          audioCtx.currentTime, 
-          0.5
-        );
+      // Resume if suspended
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
       }
-    });
-  }
 
-  function initHowlSounds() {
-    hoverSound = new Howl({ src: ['/audio/hover.mp3'], volume: 0.08, rate: 1.2 });
-    clickSound = new Howl({ src: ['/audio/click.mp3'], volume: 0.15 });
-    ambientSound = new Howl({ 
-      src: ['/audio/ambient.mp3'], 
-      loop: true, 
-      volume: 0,
-    });
-    
-    // Fade ambient in
-    ambientSound.play();
-    ambientSound.fade(0, 0.25, 3000);
+      // Build effects chain: panner → lowpass → destination
+      pannerNode = audioCtx.createStereoPanner();
+      lowpassFilter = audioCtx.createBiquadFilter();
+      lowpassFilter.type = 'lowpass';
+      lowpassFilter.frequency.value = 20000;
+      lowpassFilter.Q.value = 0.8;
 
-    // UI Sounds
-    window.addEventListener('mousedown', () => {
-      if (engine.isAudioEnabled) clickSound.play();
-    });
+      pannerNode.connect(lowpassFilter);
+      lowpassFilter.connect(audioCtx.destination);
 
-    document.querySelectorAll('a, button, [data-magnetic]').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        if (engine.isAudioEnabled) hoverSound.play();
+      // Wire Howler into our chain
+      Howler.ctx = audioCtx;
+      try {
+        Howler.masterGain.disconnect();
+        Howler.masterGain.connect(pannerNode);
+      } catch(e) {
+        // If disconnect fails, just connect directly
+        Howler.masterGain.connect(pannerNode);
+      }
+
+      // ─── Load sounds with fallback URLs ─────────────────────────
+      // Using multiple src fallbacks for reliability
+      hoverSound = new Howl({
+        src: ['/audio/hover.mp3'],
+        volume: 0.07,
+        onloaderror: () => console.log('hover sound load error - silent fail')
       });
-    });
 
-    // Re-attach hover sounds after dynamic content loads
-    const observer = new MutationObserver(() => {
-      document.querySelectorAll('a, button, [data-magnetic]:not([data-sound-attached])').forEach(el => {
-        el.setAttribute('data-sound-attached', 'true');
+      clickSound = new Howl({
+        src: ['/audio/click.mp3'],
+        volume: 0.12,
+        onloaderror: () => console.log('click sound load error - silent fail')
+      });
+
+      // Ambient: use a looping tone generated via Web Audio as fallback
+      ambientSound = new Howl({
+        src: ['/audio/ambient.mp3'],
+        loop: true,
+        volume: 0,
+        onloaderror: () => {
+          console.log('ambient mp3 failed, using oscillator fallback');
+          startOscillatorAmbient();
+        }
+      });
+
+      const playId = ambientSound.play();
+      ambientSound.fade(0, 0.18, 3000);
+
+      // ─── Spatial panning from mouse position ────────────────────
+      engine.subscribe(() => {
+        if (!pannerNode || !audioCtx || audioCtx.state !== 'running') return;
+        const norm = (engine.mouse.lx / window.innerWidth) * 2 - 1;
+        pannerNode.pan.setTargetAtTime(norm * 0.35, audioCtx.currentTime, 0.3);
+      });
+
+      // ─── Scroll-driven lowpass soundscape ───────────────────────
+      ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => {
+          if (!lowpassFilter || !audioCtx || audioCtx.state !== 'running') return;
+          const p = self.progress;
+          const freq = p < 0.5
+            ? 20000 - p * 2 * 15000
+            : 5000 + (p - 0.5) * 2 * 15000;
+          lowpassFilter.frequency.setTargetAtTime(Math.max(500, freq), audioCtx.currentTime, 0.4);
+        }
+      });
+
+      // ─── UI sounds on interactions ───────────────────────────────
+      window.addEventListener('mousedown', () => {
+        if (engine.isAudioEnabled && clickSound) clickSound.play();
+      });
+
+      document.querySelectorAll('a, button, [data-magnetic]').forEach(el => {
         el.addEventListener('mouseenter', () => {
-          if (engine.isAudioEnabled) hoverSound.play();
+          if (engine.isAudioEnabled && hoverSound) hoverSound.play();
         });
       });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+
+    } catch(err) {
+      console.error('Audio init error:', err);
+    }
   }
 
-  if (overlay && unmuteBtn) {
-    unmuteBtn.addEventListener('click', () => {
-      engine.enableAudio();
-      initSpatialAudio();
-      initHowlSounds();
+  // ─── Oscillator Ambient Fallback (no file needed) ─────────────────
+  function startOscillatorAmbient() {
+    if (!audioCtx) return;
+    // Create a subtle drone using oscillators (pure Web Audio, no file)
+    const createDroneOsc = (freq: number, gain: number) => {
+      const osc = audioCtx!.createOscillator();
+      const gainNode = audioCtx!.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gainNode.gain.value = gain;
+      osc.connect(gainNode);
+      gainNode.connect(lowpassFilter || audioCtx!.destination);
+      osc.start();
+    };
 
-      // Fade out overlay with GSAP
+    // Deep drone: 40Hz + 60Hz + 80Hz creates rich ambient texture
+    createDroneOsc(40, 0.04);
+    createDroneOsc(60, 0.02);
+    createDroneOsc(80, 0.015);
+    createDroneOsc(120, 0.008);
+  }
+
+  // ─── Button click handler ─────────────────────────────────────────
+  if (unmuteBtn) {
+    unmuteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      engine.enableAudio();
+      initAudio();
+
       gsap.to(overlay, {
         opacity: 0,
-        duration: 1.5,
+        duration: 1.2,
         ease: 'power4.inOut',
-        onComplete: () => { overlay.style.display = 'none'; }
+        onComplete: () => {
+          overlay.style.display = 'none';
+          overlay.style.pointerEvents = 'none';
+        }
       });
     });
   }
 </script>
 
 <style>
+  #audio-overlay {
+    pointer-events: auto !important;
+  }
+  #unmute-btn {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
   @keyframes slide-left {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
@@ -166,10 +205,6 @@
     from { transform: translateX(-50%); }
     to { transform: translateX(0); }
   }
-  .animate-slide-left {
-    animation: slide-left 20s linear infinite;
-  }
-  .animate-slide-right {
-    animation: slide-right 20s linear infinite;
-  }
+  .animate-slide-left { animation: slide-left 20s linear infinite; }
+  .animate-slide-right { animation: slide-right 20s linear infinite; }
 </style>

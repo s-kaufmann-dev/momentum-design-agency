@@ -1,10 +1,7 @@
----
----
-<!-- Custom Cursor -->
-<div id="cursor-outer" class="fixed pointer-events-none z-[9000] opacity-0"></div>
-<div id="cursor-dot" class="fixed pointer-events-none z-[9001] opacity-0"></div>
-<!-- Cursor label that shows on magnetic elements -->
-<div id="cursor-label" class="fixed pointer-events-none z-[9002] opacity-0 text-[9px] uppercase tracking-widest text-white/80 whitespace-nowrap"></div>
+<!-- Custom Cursor - pointer-events MUST be none so it never blocks clicks -->
+<div id="cursor-outer" class="fixed pointer-events-none z-[9000] opacity-0" style="pointer-events:none;"></div>
+<div id="cursor-dot" class="fixed pointer-events-none z-[9001] opacity-0" style="pointer-events:none;"></div>
+<div id="cursor-label" class="fixed pointer-events-none z-[9002] opacity-0 text-[9px] uppercase tracking-widest text-white/80 whitespace-nowrap" style="pointer-events:none;"></div>
 
 <script>
   import gsap from 'gsap';
