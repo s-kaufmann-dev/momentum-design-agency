@@ -69,7 +69,7 @@ const projects = [
           <!-- Image with clip-path reveal + grayscale hover -->
           <div class="image-reveal absolute inset-0">
             <div class="image-inner absolute inset-0 transition-transform duration-[1.2s] group-hover:scale-110">
-              <img src={p.img} alt={p.title} class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-[1.5s]" data-distort />
+              <img src={p.img} alt={p.title} class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-[1.5s]" crossorigin="anonymous" />
             </div>
             <!-- Glassmorphism reflection -->
             <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.06] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-[1.2s]"></div>
