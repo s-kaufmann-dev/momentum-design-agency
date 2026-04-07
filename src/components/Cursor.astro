@@ -1,65 +1,110 @@
 ---
 ---
-<div id="cursor-container" class="fixed top-0 left-0 w-full h-full pointer-events-none z-50">
-  <div id="cursor-main" class="w-6 h-6 border border-white/50 rounded-full flex items-center justify-center mix-blend-difference overflow-hidden">
-    <div id="cursor-dot" class="w-1 h-1 bg-white rounded-full"></div>
-  </div>
-</div>
+<!-- Custom Cursor -->
+<div id="cursor-outer" class="fixed pointer-events-none z-[9000] opacity-0"></div>
+<div id="cursor-dot" class="fixed pointer-events-none z-[9001] opacity-0"></div>
+<!-- Cursor label that shows on magnetic elements -->
+<div id="cursor-label" class="fixed pointer-events-none z-[9002] opacity-0 text-[9px] uppercase tracking-widest text-white/80 whitespace-nowrap"></div>
 
 <script>
-  import { engine } from '../lib/engine';
   import gsap from 'gsap';
+  import { engine } from '../lib/engine';
 
-  const cursorMain = document.getElementById('cursor-main');
-  const cursorDot = document.getElementById('cursor-dot');
-  
-  if (cursorMain && cursorDot) {
-    // Initial hide
-    gsap.set(cursorMain, { opacity: 0 });
+  const outer = document.getElementById('cursor-outer');
+  const dot = document.getElementById('cursor-dot');
+  const label = document.getElementById('cursor-label');
 
-    engine.subscribe(() => {
-      // Basic movement
-      gsap.set(cursorMain, {
-        x: engine.mouse.lx - 12, // Center cursor (12 is half of 24)
-        y: engine.mouse.lx - 12, 
-        // Wait, I mean engine.mouse.ly
-        opacity: 1
-      });
-      // Correcting coordinates
-      cursorMain.style.transform = `translate3d(${engine.mouse.lx - 12}px, ${engine.mouse.ly - 12}px, 0)`;
-      
-      // Dynamic scaling based on velocity
-      const velocity = Math.sqrt(engine.mouse.vx ** 2 + engine.mouse.vy ** 2);
-      const scaleX = 1 + velocity * 0.05;
-      const scaleY = 1 - velocity * 0.05;
-      const rotation = Math.atan2(engine.mouse.vy, engine.mouse.vx) * (180 / Math.PI);
-      
-      cursorMain.style.transform += ` rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;
+  if (!outer || !dot || !label) { /* skip SSR */ }
+  else {
+    // ─── Style the cursor rings ─────────────────────────────────────
+    Object.assign(outer.style, {
+      width: '40px', height: '40px',
+      borderRadius: '50%',
+      border: '1px solid rgba(255,77,0,0.6)',
+      marginLeft: '-20px', marginTop: '-20px',
+      transformOrigin: 'center center',
+      mixBlendMode: 'difference',
+      willChange: 'transform',
+      transition: 'opacity 0.3s'
+    });
+    Object.assign(dot.style, {
+      width: '6px', height: '6px',
+      borderRadius: '50%',
+      background: '#ff4d00',
+      marginLeft: '-3px', marginTop: '-3px',
+      transformOrigin: 'center center',
+      willChange: 'transform',
+      transition: 'opacity 0.3s'
     });
 
-    // Magnetic logic for interactive elements
-    const updateMagnets = () => {
-        const magnets = document.querySelectorAll('[data-magnetic]');
-        magnets.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                gsap.to(cursorMain, { scale: 2.5, duration: 0.3 });
-                gsap.to(cursorDot, { opacity: 0, duration: 0.2 });
-            });
-            el.addEventListener('mouseleave', () => {
-                gsap.to(cursorMain, { scale: 1, duration: 0.3 });
-                gsap.to(cursorDot, { opacity: 1, duration: 0.2 });
-            });
-        });
-    };
+    // ─── Show cursor on first move ──────────────────────────────────
+    let hasMoved = false;
+    window.addEventListener('mousemove', () => {
+      if (!hasMoved) {
+        hasMoved = true;
+        gsap.to([outer, dot], { opacity: 1, duration: 0.5 });
+      }
+    });
 
-    // Re-scan magnets periodically or on DOM change
-    updateMagnets();
+    // ─── GSAP driven position + velocity stretch ─────────────────────
+    engine.subscribe(() => {
+      const mx = engine.mouse.lx;
+      const my = engine.mouse.ly;
+
+      // Velocity-based stretching (squash & stretch)
+      const speed = Math.sqrt(engine.mouse.vx ** 2 + engine.mouse.vy ** 2);
+      const stretch = 1 + Math.min(speed * 0.12, 1.2);
+      const angle = Math.atan2(engine.mouse.vy, engine.mouse.vx) * (180 / Math.PI);
+
+      gsap.set(outer, {
+        x: mx, y: my,
+        scaleX: stretch,
+        scaleY: 1 / stretch,
+        rotation: angle,
+      });
+      gsap.set(dot, { x: engine.mouse.x, y: engine.mouse.y });
+      gsap.set(label, { x: engine.mouse.x + 20, y: engine.mouse.y + 20 });
+    });
+
+    // ─── Magnetic Effect ───────────────────────────────────────────
+    document.querySelectorAll('[data-magnetic]').forEach(el => {
+      const element = el as HTMLElement;
+      const magnetLabel = element.dataset.magneticLabel || '';
+
+      element.addEventListener('mouseenter', () => {
+        gsap.to(outer, { scale: 2.5, borderColor: 'rgba(255,77,0,1)', duration: 0.4 });
+        if (magnetLabel) {
+          label.textContent = magnetLabel;
+          gsap.to(label, { opacity: 1, duration: 0.3 });
+        }
+      });
+
+      element.addEventListener('mousemove', (e) => {
+        const bounds = element.getBoundingClientRect();
+        const relX = e.clientX - bounds.left - bounds.width / 2;
+        const relY = e.clientY - bounds.top - bounds.height / 2;
+        gsap.to(element, {
+          x: relX * 0.35,
+          y: relY * 0.35,
+          duration: 0.6,
+          ease: 'power3.out'
+        });
+      });
+
+      element.addEventListener('mouseleave', () => {
+        gsap.to(outer, { scale: 1, borderColor: 'rgba(255,77,0,0.6)', duration: 0.4 });
+        gsap.to(element, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1,0.5)' });
+        gsap.to(label, { opacity: 0, duration: 0.2 });
+        label.textContent = '';
+      });
+    });
+
+    // ─── Cursor state changes ──────────────────────────────────────
+    document.addEventListener('mousedown', () => {
+      gsap.to(outer, { scale: 0.7, duration: 0.15 });
+    });
+    document.addEventListener('mouseup', () => {
+      gsap.to(outer, { scale: 1, duration: 0.3, ease: 'elastic.out(1,0.5)' });
+    });
   }
 </script>
-
-<style>
-  #cursor-main {
-    will-change: transform;
-    transition: width 0.3s, height 0.3s, background-color 0.3s;
-  }
-</style>

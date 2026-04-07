@@ -1,30 +1,57 @@
 ---
 ---
-<section id="about" class="bg-black text-white py-48 min-h-screen flex items-center">
-  <div class="container mx-auto px-6">
-    <div class="max-w-5xl mx-auto">
-      <p class="text-accent text-xs uppercase tracking-[0.4em] mb-12">02 / The Manifesto</p>
+<section id="about" class="bg-black text-white py-48 min-h-screen flex items-center relative overflow-hidden">
+  <!-- Decorative number -->
+  <div class="absolute right-8 top-1/2 -translate-y-1/2 text-[30vw] font-black text-white/[0.02] leading-none select-none pointer-events-none">01</div>
+  
+  <div class="container mx-auto px-6 relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-24 items-center">
       
-      <div id="about-text-container" class="text-4xl md:text-6xl font-light leading-tight tracking-tight uppercase">
-        We do not just build websites.<br/>
-        We engineer <span class="font-black">digital velocity</span>.<br/><br/>
-        Momentum is an exclusive nexus where visionary brands meet the world's most <span class="italic text-accent">elite creative talent</span>. We blur the line between utility and art, crafting interactive spaces that leave a lasting physical impact on the digital plane.
+      <!-- Left: Label + Statement -->
+      <div class="lg:col-span-4">
+        <p class="text-accent text-[9px] uppercase tracking-[0.5em] mb-6 about-reveal">01 / Das Manifest</p>
+        <div class="about-reveal">
+          <div class="w-12 h-px bg-accent mb-8"></div>
+          <p class="text-white/40 text-sm uppercase tracking-widest leading-loose">
+            Gegründet 2020<br/>
+            Düsseldorf, Deutschland<br/>
+            12 Kreative / 200+ Projekte
+          </p>
+        </div>
       </div>
 
-      <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/10 pt-16">
-        <div>
-          <h4 class="text-3xl font-bold mb-4">01. Strategy</h4>
-          <p class="text-white/50 text-sm uppercase tracking-widest leading-relaxed">We decode your brand DNA to engineer concepts that command attention.</p>
+      <!-- Right: Big statement text -->
+      <div class="lg:col-span-8">
+        <div id="about-text" class="text-[clamp(2rem,5vw,5.5rem)] font-light leading-[1.05] tracking-tight about-reveal">
+          Wir bauen keine Websites.<br/>
+          <span class="font-black">Wir erschaffen digitale Erlebnisse</span>,<br/>
+          die Menschen bewegen, Marken<br/>
+          definieren und Standards setzen.
         </div>
-        <div>
-          <h4 class="text-3xl font-bold mb-4">02. Talent</h4>
-          <p class="text-white/50 text-sm uppercase tracking-widest leading-relaxed">Our roster features highly vetted Creative Directors and WebGL artists.</p>
-        </div>
-        <div>
-          <h4 class="text-3xl font-bold mb-4">03. Motion</h4>
-          <p class="text-white/50 text-sm uppercase tracking-widest leading-relaxed">Kinetic interactions that transform static screens into living ecosystems.</p>
+        
+        <div class="mt-16 grid grid-cols-3 gap-8 about-reveal">
+          <div class="border-t border-white/10 pt-6">
+            <p class="text-5xl font-black text-accent mb-2">200+</p>
+            <p class="text-[9px] uppercase tracking-widest text-white/40">Projekte weltweit</p>
+          </div>
+          <div class="border-t border-white/10 pt-6">
+            <p class="text-5xl font-black text-accent mb-2">98%</p>
+            <p class="text-[9px] uppercase tracking-widest text-white/40">Kundenzufriedenheit</p>
+          </div>
+          <div class="border-t border-white/10 pt-6">
+            <p class="text-5xl font-black text-accent mb-2">6</p>
+            <p class="text-[9px] uppercase tracking-widest text-white/40">Internationale Awards</p>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- Bottom quote -->
+    <div class="mt-40 about-reveal">
+      <blockquote class="text-[clamp(1.2rem,3vw,3rem)] font-light italic text-white/30 max-w-4xl leading-relaxed border-l-2 border-accent/40 pl-8">
+        „Design ist nicht das, was gut aussieht. Design ist das, was funktioniert — und gleichzeitig das Unmögliche schön macht."
+      </blockquote>
+      <p class="mt-4 text-[9px] uppercase tracking-widest text-white/20 pl-8">— Momentum Design Team</p>
     </div>
   </div>
 </section>
@@ -32,24 +59,17 @@
 <script>
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
   gsap.registerPlugin(ScrollTrigger);
 
-  const aboutText = document.getElementById('about-text-container');
-  if (aboutText) {
-    // A simple yet effective text reveal
-    gsap.fromTo(aboutText, 
-      { opacity: 0, y: 50 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: 1.5, 
+  document.querySelectorAll('.about-reveal').forEach((el) => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 60 },
+      {
+        opacity: 1, y: 0,
+        duration: 1.4,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: aboutText,
-          start: 'top 80%',
-        }
+        scrollTrigger: { trigger: el, start: 'top 85%' }
       }
     );
-  }
+  });
 </script>

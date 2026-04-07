@@ -1,0 +1,72 @@
+---
+const process = [
+  { num: "01", title: "Brief", desc: "Wir hören zu. Intensive Gespräche über deine Ziele, Zielgruppe und Vision. Kein Template, nur maßgeschneiderte Strategie." },
+  { num: "02", title: "Konzept", desc: "Wireframes, Moodboards, Designdirektionen. Wir zeigen dir 2–3 Ansätze und verfeinern gemeinsam bis zur Perfektion." },
+  { num: "03", title: "Design", desc: "Pixel-perfekte UI-Designs in Figma. Responsive für alle Geräte, mit Animations-Spezifikationen und Styleguide." },
+  { num: "04", title: "Development", desc: "Wir bauen mit modernsten Technologien (Astro, Next.js, GSAP, Three.js). Performance & Barrierefreiheit sind Standard." },
+  { num: "05", title: "Launch", desc: "Deployment, SEO-Setup, Analytics-Integration. Wir gehen gemeinsam live — und feiern deinen Erfolg." },
+];
+---
+<section id="process" class="bg-black py-48 relative overflow-hidden">
+  <div class="absolute right-0 top-0 w-px h-full bg-white/5"></div>
+  
+  <div class="container mx-auto px-6">
+    <div class="mb-24">
+      <p class="text-accent text-[9px] uppercase tracking-[0.5em] mb-5">04 / Unser Prozess</p>
+      <h2 class="text-[clamp(3rem,9vw,9rem)] font-black tracking-tighter uppercase leading-none">Wie wir<br/>arbeiten</h2>
+    </div>
+
+    <div class="relative">
+      <!-- Vertical timeline line -->
+      <div class="absolute left-0 top-0 w-px h-full bg-white/5 hidden lg:block"></div>
+      
+      <div class="space-y-0">
+        {process.map((step, i) => (
+          <div class="process-step grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start py-12 lg:py-16 border-b border-white/5 group hover:bg-white/[0.01] transition-colors duration-500">
+            
+            <!-- Number -->
+            <div class="lg:col-span-1 lg:pl-8">
+              <span class="text-[9px] uppercase tracking-widest text-accent">{step.num}</span>
+            </div>
+            
+            <!-- Title -->
+            <div class="lg:col-span-4">
+              <h3 class="text-[clamp(2rem,5vw,5rem)] font-black uppercase tracking-tighter leading-none text-white group-hover:text-accent transition-colors duration-500">
+                {step.title}
+              </h3>
+            </div>
+            
+            <!-- Description -->
+            <div class="lg:col-span-5">
+              <p class="text-white/40 text-base leading-relaxed">{step.desc}</p>
+            </div>
+            
+            <!-- Arrow -->
+            <div class="lg:col-span-2 flex justify-end items-start">
+              <span class="text-white/10 text-5xl font-thin group-hover:text-accent group-hover:translate-x-2 transition-all duration-500">→</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.querySelectorAll('.process-step').forEach((step, i) => {
+    gsap.fromTo(step,
+      { opacity: 0, x: -40 },
+      {
+        opacity: 1, x: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: step, start: 'top 88%' },
+        delay: i * 0.05
+      }
+    );
+  });
+</script>

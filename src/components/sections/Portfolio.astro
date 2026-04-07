@@ -1,63 +1,93 @@
 ---
 const projects = [
-  { 
-    title: "Vanguard", 
-    category: "Branding", 
-    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
-    size: "col-span-2 row-span-2"
+  {
+    title: "Apex Nexus",
+    category: "Webdesign & Branding",
+    tag: "Award-Winner",
+    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
+    year: "2025",
+    size: "col-span-2 row-span-2",
+    result: "+340% Conversion"
   },
-  { 
-    title: "Apex Nexus", 
-    category: "Kinetic UI", 
-    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop",
-    size: "col-span-1 row-span-1"
+  {
+    title: "Lyra Studio",
+    category: "Kinetic UI",
+    tag: "Immersive",
+    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop",
+    year: "2025",
+    size: "col-span-1 row-span-1",
+    result: "+180% Traffic"
   },
-  { 
-    title: "Cipher Core", 
-    category: "Immersive Web", 
-    img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop",
-    size: "col-span-1 row-span-2"
+  {
+    title: "Cipher",
+    category: "3D Webdesign",
+    tag: "WebGL",
+    img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800&auto=format&fit=crop",
+    year: "2024",
+    size: "col-span-1 row-span-2",
+    result: "Cannes Lions"
   },
-  { 
-    title: "Elysium", 
-    category: "Design System", 
-    img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1000&auto=format&fit=crop",
-    size: "col-span-1 row-span-1"
-  }
+  {
+    title: "Elysium",
+    category: "E-Commerce",
+    tag: "Shopify Plus",
+    img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop",
+    year: "2024",
+    size: "col-span-1 row-span-1",
+    result: "+520% Umsatz"
+  },
 ];
 ---
-<section id="portfolio" class="bg-[#050505] py-48 min-h-screen">
-  <div class="container mx-auto px-6">
+<section id="portfolio" class="bg-[#050505] py-48 min-h-screen relative overflow-hidden">
+  <!-- Background scroll typography -->
+  <div id="portfolio-bg-text" class="absolute inset-0 flex items-center pointer-events-none overflow-hidden z-0">
+    <p class="text-[22vw] font-black text-white/[0.015] uppercase leading-none whitespace-nowrap select-none">PROJEKTE REFERENZEN DESIGN</p>
+  </div>
+
+  <div class="container mx-auto px-6 relative z-10">
     <div class="mb-32 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
       <div>
-        <p class="text-accent text-xs uppercase tracking-[0.4em] mb-4">03 / Case Studies</p>
-        <h2 class="text-8xl font-black tracking-tighter uppercase leading-none">Global<br/>Impact</h2>
+        <p class="text-accent text-[9px] uppercase tracking-[0.5em] mb-5">03 / Referenzen</p>
+        <h2 class="text-[clamp(3rem,10vw,10rem)] font-black tracking-tighter uppercase leading-none">Unsere<br/>Besten</h2>
       </div>
-      <p class="max-w-xs text-white/40 text-sm leading-relaxed uppercase tracking-widest">Iconic transformations driven by our unmatched roster of digital pioneers.</p>
+      <div class="max-w-xs">
+        <p class="text-white/35 text-sm leading-relaxed uppercase tracking-widest">Projekte, die Branchenstandards neu definiert haben.</p>
+        <a href="#" class="mt-6 inline-flex items-center gap-3 text-[9px] uppercase tracking-widest text-accent hover:text-white transition-colors duration-300 group" data-magnetic>
+          Alle Projekte 
+          <span class="w-8 h-px bg-accent group-hover:w-16 transition-all duration-500"></span>
+        </a>
+      </div>
     </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-8 md:gap-12">
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 auto-rows-[300px]">
       {projects.map((p, i) => (
-        <div 
+        <div
           class={`portfolio-card group relative cursor-pointer overflow-hidden bg-neutral-900 ${p.size}`}
           data-magnetic
+          data-magnetic-label={p.category}
         >
-          <div class="image-reveal absolute inset-0 overflow-hidden">
-            <div class="image-container absolute inset-0 transition-transform duration-700 group-hover:scale-110">
-              <img 
-                 src={p.img} 
-                 alt={p.title} 
-                 class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-[filter] duration-1000" 
-                 data-distort
-              />
+          <!-- Image with clip-path reveal + grayscale hover -->
+          <div class="image-reveal absolute inset-0">
+            <div class="image-inner absolute inset-0 transition-transform duration-[1.2s] group-hover:scale-110">
+              <img src={p.img} alt={p.title} class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-[1.5s]" data-distort />
             </div>
-            <!-- Glass Reflection Layer -->
-            <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
+            <!-- Glassmorphism reflection -->
+            <div class="absolute inset-0 bg-gradient-to-tr from-white/[0.06] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-[1.2s]"></div>
           </div>
           
-          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-8 flex flex-col justify-end backdrop-blur-[2px]">
-             <p class="text-accent text-[10px] uppercase font-black tracking-[0.3em] mb-2">{p.category}</p>
-             <h3 class="text-4xl font-black uppercase tracking-tighter transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{p.title}</h3>
+          <!-- Hover overlay info -->
+          <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-7 backdrop-blur-[1px]">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              <div class="flex justify-between items-start mb-3">
+                <p class="text-accent text-[9px] uppercase tracking-[0.3em] font-bold">{p.category}</p>
+                <span class="text-white/40 text-[9px] uppercase tracking-widest border border-white/20 px-2 py-1">{p.tag}</span>
+              </div>
+              <h3 class="text-[clamp(1.5rem,4vw,3rem)] font-black uppercase tracking-tighter leading-none">{p.title}</h3>
+              <div class="flex justify-between items-center mt-4">
+                <p class="text-white/40 text-[9px] uppercase tracking-widest">{p.year}</p>
+                <p class="text-accent text-[9px] uppercase tracking-widest font-bold">{p.result}</p>
+              </div>
+            </div>
           </div>
         </div>
       ))}
@@ -66,59 +96,43 @@ const projects = [
 </section>
 
 <script>
-  import { engine } from '../../lib/engine';
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
   gsap.registerPlugin(ScrollTrigger);
 
-  // Reveal Animations
-  const reveals = document.querySelectorAll('.image-reveal');
-  reveals.forEach(reveal => {
-    gsap.fromTo(reveal, 
+  // ─── Scroll-driven background text parallax ────────────────────
+  const bgText = document.getElementById('portfolio-bg-text');
+  if (bgText) {
+    gsap.to(bgText.firstElementChild, {
+      x: '-30%',
+      ease: 'none',
+      scrollTrigger: { trigger: '#portfolio', start: 'top bottom', end: 'bottom top', scrub: 1 }
+    });
+  }
+
+  // ─── Clip-path reveal on scroll ───────────────────────────────
+  document.querySelectorAll('.image-reveal').forEach(el => {
+    gsap.fromTo(el,
       { clipPath: 'inset(100% 0% 0% 0%)' },
-      { 
-        clipPath: 'inset(0% 0% 0% 0%)', 
-        duration: 2, 
-        ease: 'power4.inOut',
-        scrollTrigger: {
-            trigger: reveal,
-            start: 'top 90%',
-        }
+      {
+        clipPath: 'inset(0% 0% 0% 0%)',
+        duration: 1.8, ease: 'power4.inOut',
+        scrollTrigger: { trigger: el, start: 'top 90%' }
       }
     );
   });
 
-  // 3D Tilt Logic Refined
-  const cards = document.querySelectorAll('.portfolio-card');
-  cards.forEach(card => {
+  // ─── 3D Tilt Effect (Kipp-Effekt) ─────────────────────────────
+  document.querySelectorAll('.portfolio-card').forEach(card => {
     const el = card as HTMLElement;
-    
     el.addEventListener('mousemove', (e) => {
-      const bounds = el.getBoundingClientRect();
-      const mouseX = e.clientX - bounds.left;
-      const mouseY = e.clientY - bounds.top;
-      
-      const xPercent = (mouseX / bounds.width - 0.5) * 2;
-      const yPercent = (mouseY / bounds.height - 0.5) * 2;
-      
-      gsap.to(el, {
-        rotateX: -yPercent * 15,
-        rotateY: xPercent * 15,
-        scale: 1.02,
-        duration: 0.6,
-        ease: 'power2.out'
-      });
+      const b = el.getBoundingClientRect();
+      const x = ((e.clientX - b.left) / b.width - 0.5) * 2;
+      const y = ((e.clientY - b.top) / b.height - 0.5) * 2;
+      gsap.to(el, { rotateX: -y * 14, rotateY: x * 14, scale: 1.02, duration: 0.6, ease: 'power2.out' });
     });
-    
     el.addEventListener('mouseleave', () => {
-      gsap.to(el, {
-        rotateX: 0,
-        rotateY: 0,
-        scale: 1,
-        duration: 1,
-        ease: 'elastic.out(1, 0.6)'
-      });
+      gsap.to(el, { rotateX: 0, rotateY: 0, scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.5)' });
     });
   });
 </script>
@@ -127,13 +141,6 @@ const projects = [
   .portfolio-card {
     perspective: 1500px;
     transform-style: preserve-3d;
-    will-change: transform, clip-path;
-  }
-</style>
-
-<style>
-  .portfolio-card {
-    perspective: 1000px;
-    transform-style: preserve-3d;
+    will-change: transform;
   }
 </style>

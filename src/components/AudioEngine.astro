@@ -1,69 +1,175 @@
 ---
 ---
-<div id="audio-overlay" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[100] transition-opacity duration-1000 group">
-  <button id="unmute-btn" class="relative group cursor-pointer overflow-hidden p-8">
-    <span class="text-white text-4xl font-bold tracking-tighter uppercase group-hover:scale-110 transition-transform duration-500">MOMENTUM / ENTER</span>
-    <div class="absolute bottom-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-110 transition-transform duration-500 origin-left"></div>
-  </button>
-  <p class="text-white/40 mt-4 text-xs tracking-widest uppercase">Best experienced with audio</p>
+
+<!-- Audio Gateway Overlay -->
+<div id="audio-overlay" class="fixed inset-0 bg-[#030303] flex flex-col items-center justify-center z-[200]">
+  <!-- Animated background text -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03]">
+    <div class="absolute top-1/4 left-0 text-[25vw] font-black uppercase whitespace-nowrap leading-none tracking-tighter animate-slide-left">MOMENTUM MOMENTUM MOMENTUM</div>
+    <div class="absolute bottom-1/4 left-0 text-[25vw] font-black uppercase whitespace-nowrap leading-none tracking-tighter animate-slide-right">DESIGN DESIGN DESIGN DESIGN</div>
+  </div>
+  
+  <div class="relative z-10 text-center">
+    <p class="text-white/30 text-[10px] uppercase tracking-[0.4em] mb-12">Momentum Design Agentur / 2026</p>
+    
+    <button id="unmute-btn" class="group relative cursor-pointer overflow-hidden px-16 py-8 border border-white/20 hover:border-white/60 transition-colors duration-500">
+      <span class="relative z-10 text-white text-2xl font-light tracking-[0.3em] uppercase group-hover:tracking-[0.5em] transition-all duration-700">EINTRETEN</span>
+      <!-- Hover fill -->
+      <div class="absolute inset-0 bg-white/5 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+    </button>
+    
+    <p class="text-white/25 mt-8 text-[9px] tracking-[0.3em] uppercase">Am besten mit Audio-Eindrücken erleben</p>
+    
+    <!-- Pulsing indicator -->
+    <div class="mt-16 flex items-center gap-3">
+      <div class="w-1 h-1 rounded-full bg-accent animate-ping"></div>
+      <span class="text-white/20 text-[8px] uppercase tracking-widest">Ton wird aktiviert</span>
+    </div>
+  </div>
 </div>
 
 <script>
   import { Howl, Howler } from 'howler';
   import { engine } from '../lib/engine';
   import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
 
   const overlay = document.getElementById('audio-overlay');
   const unmuteBtn = document.getElementById('unmute-btn');
 
+  // ─── Audio Context + Nodes ──────────────────────────────────────
+  let audioCtx: AudioContext | null = null;
+  let masterGain: GainNode | null = null;
+  let lowpassFilter: BiquadFilterNode | null = null;
+  let pannerNode: StereoPannerNode | null = null;
+
+  // ─── Howler sounds ──────────────────────────────────────────────
+  let hoverSound: Howl;
+  let clickSound: Howl;
+  let ambientSound: Howl;
+
+  function initSpatialAudio() {
+    // Web Audio API for advanced spatial effects
+    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.7;
+
+    // Lowpass filter for scroll-driven muffling
+    lowpassFilter = audioCtx.createBiquadFilter();
+    lowpassFilter.type = 'lowpass';
+    lowpassFilter.frequency.value = 20000; // Start fully open
+    lowpassFilter.Q.value = 1;
+
+    // Stereo panner for mouse-driven spatial audio
+    pannerNode = audioCtx.createStereoPanner();
+    pannerNode.pan.value = 0;
+
+    // Chain: panner → lowpass → gain → output
+    pannerNode.connect(lowpassFilter);
+    lowpassFilter.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+
+    // Connect Howler to the Web Audio API graph
+    Howler.ctx = audioCtx;
+    Howler.masterGain.connect(pannerNode);
+    Howler.masterGain.disconnect(audioCtx.destination); // Remove direct connection
+
+    // ─── Spatial Panning based on mouse ──────────────────────────
+    engine.subscribe(() => {
+      if (!audioCtx || !pannerNode) return;
+      const normalizedX = (engine.mouse.lx / window.innerWidth) * 2 - 1; // -1 to 1
+      pannerNode.pan.setTargetAtTime(normalizedX * 0.4, audioCtx.currentTime, 0.3);
+    });
+
+    // ─── Scroll-driven soundscapes (Lowpass filter) ───────────────
+    ScrollTrigger.create({
+      start: 0,
+      end: 'max',
+      onUpdate: (self) => {
+        if (!lowpassFilter || !audioCtx) return;
+        // 0% scroll = 20000hz open, 100% scroll = 800hz muffled → back to clear
+        const p = self.progress;
+        // Creates a "wave" of muffling as you scroll
+        const freq = p < 0.5 
+          ? 20000 - (p * 2) * 18000  // Open → muffled (0→50%)
+          : 2000 + ((p - 0.5) * 2) * 18000; // Muffled → clear (50→100%)
+        lowpassFilter.frequency.setTargetAtTime(
+          Math.max(400, freq), 
+          audioCtx.currentTime, 
+          0.5
+        );
+      }
+    });
+  }
+
+  function initHowlSounds() {
+    hoverSound = new Howl({ src: ['/audio/hover.mp3'], volume: 0.08, rate: 1.2 });
+    clickSound = new Howl({ src: ['/audio/click.mp3'], volume: 0.15 });
+    ambientSound = new Howl({ 
+      src: ['/audio/ambient.mp3'], 
+      loop: true, 
+      volume: 0,
+    });
+    
+    // Fade ambient in
+    ambientSound.play();
+    ambientSound.fade(0, 0.25, 3000);
+
+    // UI Sounds
+    window.addEventListener('mousedown', () => {
+      if (engine.isAudioEnabled) clickSound.play();
+    });
+
+    document.querySelectorAll('a, button, [data-magnetic]').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        if (engine.isAudioEnabled) hoverSound.play();
+      });
+    });
+
+    // Re-attach hover sounds after dynamic content loads
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('a, button, [data-magnetic]:not([data-sound-attached])').forEach(el => {
+        el.setAttribute('data-sound-attached', 'true');
+        el.addEventListener('mouseenter', () => {
+          if (engine.isAudioEnabled) hoverSound.play();
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
   if (overlay && unmuteBtn) {
     unmuteBtn.addEventListener('click', () => {
-      // Initialize Audio
       engine.enableAudio();
-      
-      // Global UI sounds
-      const hoverSound = new Howl({
-        src: ['/audio/hover.mp3'], // Local hover
-        volume: 0.1,
-      });
+      initSpatialAudio();
+      initHowlSounds();
 
-      const clickSound = new Howl({
-        src: ['/audio/click.mp3'], // Local heavy click
-        volume: 0.2,
-      });
-
-      // Background Ambient
-      const ambient = new Howl({
-        src: ['/audio/ambient.mp3'], // Local dark ambient
-        autoplay: true,
-        loop: true,
-        volume: 0.3,
-      });
-
-      // Attach sounds to global interactions
-      window.addEventListener('mousedown', () => {
-        if (engine.isAudioEnabled) clickSound.play();
-      });
-
-      const addHaptics = () => {
-        document.querySelectorAll('a, button, [data-magnetic]').forEach(el => {
-          el.addEventListener('mouseenter', () => {
-            if (engine.isAudioEnabled) hoverSound.play();
-          });
-        });
-      };
-
-      addHaptics();
-
-      // Fade out overlay
-      gsap.to(overlay, { 
-        opacity: 0, 
-        duration: 2, 
+      // Fade out overlay with GSAP
+      gsap.to(overlay, {
+        opacity: 0,
+        duration: 1.5,
         ease: 'power4.inOut',
-        onComplete: () => {
-          overlay.style.display = 'none';
-        }
+        onComplete: () => { overlay.style.display = 'none'; }
       });
     });
   }
 </script>
+
+<style>
+  @keyframes slide-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes slide-right {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
+  }
+  .animate-slide-left {
+    animation: slide-left 20s linear infinite;
+  }
+  .animate-slide-right {
+    animation: slide-right 20s linear infinite;
+  }
+</style>

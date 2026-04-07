@@ -1,106 +1,133 @@
 ---
-const talents = [
+const team = [
   {
-    name: "Elena Rostova",
-    role: "WebGL Artist / VFX",
-    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-    desc: "Sculpting digital physics."
-  },
-  {
-    name: "Marcus Thorne",
+    name: "Maximilian Kraft",
     role: "Creative Director",
+    spec: "Brand Strategy / Art Direction",
     img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop",
-    desc: "Orchestrating brand chaos."
+    projects: 87
   },
   {
-    name: "Jin Sato",
-    role: "Motion Typographer",
+    name: "Lena Schneider",
+    role: "Lead WebGL Engineer",
+    spec: "Three.js / GLSL Shaders / VFX",
+    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
+    projects: 64
+  },
+  {
+    name: "David Krause",
+    role: "Interaction Designer",
+    spec: "GSAP / Motion / Microinteractions",
     img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
-    desc: "Breathing life into words."
+    projects: 72
   },
   {
-    name: "Aria Vance",
-    role: "Immersive Architect",
+    name: "Sara Möller",
+    role: "Fullstack Developer",
+    spec: "Astro / Next.js / Shopify Plus",
     img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
-    desc: "Spatial sound & 3D Web."
-  }
+    projects: 58
+  },
+  {
+    name: "Jonas Weber",
+    role: "3D Visualizer",
+    spec: "Blender / Spline / WebXR",
+    img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop",
+    projects: 45
+  },
 ];
 ---
-<section id="talents-wrapper" class="relative bg-[#050505] overflow-hidden">
-  
-  <div id="talents-pinned" class="h-screen w-full flex flex-col justify-center relative">
-    
-    <!-- Background Typography that moves opposite to scroll -->
-    <div class="absolute inset-0 flex flex-col justify-between py-24 pointer-events-none opacity-5 overflow-hidden">
-        <h2 id="bg-text-1" class="text-[20vw] font-black uppercase whitespace-nowrap leading-none font-sans">ELITE ROSTER ELITE ROSTER</h2>
-        <h2 id="bg-text-2" class="text-[20vw] font-black uppercase whitespace-nowrap leading-none font-sans text-right translates-x-1/2">CREATIVE TALENT CREATIVE</h2>
-    </div>
 
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="mb-16">
-        <p class="text-accent text-xs uppercase tracking-[0.4em] mb-4">03 / The Roster</p>
-        <h2 class="text-6xl font-black tracking-tighter uppercase leading-none">Our<br/>Talents</h2>
+<!-- Team Section (horizontal scroll) -->
+<section id="team-section" class="relative bg-[#070707]">
+  
+  <!-- Pinned horizontal scroll wrapper -->
+  <div id="team-pin-wrapper" class="relative" style="height: 250vh;">
+    <div id="team-stage" class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center">
+      
+      <!-- Section header -->
+      <div class="absolute top-10 left-8 z-20">
+        <p class="text-accent text-[9px] uppercase tracking-[0.5em]">05 / Das Team</p>
+        <h2 class="text-[clamp(2rem,6vw,6rem)] font-black uppercase tracking-tighter leading-none mt-2 text-white">Elite<br/>Roster</h2>
       </div>
 
-      <!-- Horizontal Scroll Container -->
-      <div id="talents-scroll-container" class="flex gap-12 w-max">
-        {talents.map((t) => (
-          <div class="w-[300px] md:w-[450px] flex-shrink-0 group cursor-pointer" data-magnetic>
-            <div class="overflow-hidden aspect-[3/4] relative mb-6">
-                <img src={t.img} alt={t.name} class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
-                <div class="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 mix-blend-overlay transition-opacity duration-500"></div>
+      <!-- Background text scrolls counter-direction -->
+      <div id="team-bg-text" class="absolute inset-0 flex items-center pointer-events-none overflow-hidden z-0">
+        <p id="team-bg-word" class="text-[30vw] font-black text-white/[0.018] uppercase leading-none whitespace-nowrap select-none">TEAM TALENT KREATIVITÄT EXZELLENZ TEAM TALENT</p>
+      </div>
+
+      <!-- Horizontal track -->
+      <div id="team-track" class="flex gap-10 pl-[30vw] pr-32 z-10 relative" style="width: max-content;">
+        {team.map((member, i) => (
+          <div
+            class="w-[320px] md:w-[400px] flex-shrink-0 group cursor-pointer"
+            data-magnetic
+            data-magnetic-label="Profil ansehen"
+          >
+            <!-- Portrait -->
+            <div class="relative overflow-hidden aspect-[3/4] mb-6">
+              <img
+                src={member.img}
+                alt={member.name}
+                class="w-full h-full object-cover object-center grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-[1.2s]"
+              />
+              <!-- Accent overlay on hover -->
+              <div class="absolute inset-0 bg-accent/15 opacity-0 group-hover:opacity-100 mix-blend-multiply transition-opacity duration-700"></div>
+              <!-- Project count badge -->
+              <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1 border border-white/10">
+                <p class="text-[8px] uppercase tracking-widest text-white/70">{member.projects} Projekte</p>
+              </div>
             </div>
-            <h3 class="text-3xl font-black uppercase tracking-tight">{t.name}</h3>
-            <p class="text-accent text-[10px] uppercase tracking-widest font-bold mt-2">{t.role}</p>
-            <p class="text-white/50 text-sm uppercase tracking-widest mt-4 italic">"{t.desc}"</p>
+            
+            <!-- Info -->
+            <h3 class="text-2xl font-black uppercase tracking-tight text-white">{member.name}</h3>
+            <p class="text-accent text-[9px] uppercase tracking-widest mt-2 font-bold">{member.role}</p>
+            <p class="text-white/35 text-[9px] uppercase tracking-widest mt-2">{member.spec}</p>
           </div>
         ))}
-        <!-- Spacer for the end -->
-        <div class="w-[10vw]"></div>
+        
+        <!-- CTA last card -->
+        <div class="w-[320px] md:w-[400px] flex-shrink-0 flex flex-col items-start justify-center">
+          <p class="text-white/30 text-[9px] uppercase tracking-widest mb-4">Werde Teil des Teams</p>
+          <h3 class="text-5xl font-black uppercase tracking-tighter text-white leading-tight mb-8">Wir suchen<br/>Talente</h3>
+          <a href="#contact" class="group relative inline-flex items-center gap-4 text-[9px] uppercase tracking-widest text-accent" data-magnetic>
+            <span>Jetzt bewerben</span>
+            <span class="w-8 h-px bg-accent group-hover:w-16 transition-all duration-500"></span>
+          </a>
+        </div>
       </div>
-    </div>
 
+    </div>
   </div>
 </section>
 
 <script>
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
   gsap.registerPlugin(ScrollTrigger);
 
-  const wrapper = document.getElementById('talents-wrapper');
-  const pinned = document.getElementById('talents-pinned');
-  const scrollContainer = document.getElementById('talents-scroll-container');
-  const bgText1 = document.getElementById('bg-text-1');
-  const bgText2 = document.getElementById('bg-text-2');
+  const wrapper = document.getElementById('team-pin-wrapper');
+  const track = document.getElementById('team-track');
+  const bgWord = document.getElementById('team-bg-word');
 
-  if (wrapper && pinned && scrollContainer) {
-    
-    // Calculate how far to move left
-    const getScrollAmount = () => -(scrollContainer.scrollWidth - window.innerWidth);
+  if (wrapper && track) {
+    const getScrollAmount = () => -(track.scrollWidth - window.innerWidth + window.innerWidth * 0.3);
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: wrapper,
         start: 'top top',
-        end: () => `+=${scrollContainer.scrollWidth}`, // Scroll duration equals width
-        pin: pinned,
-        scrub: 1,
+        end: 'bottom bottom',
+        scrub: 1.5,
         invalidateOnRefresh: true,
       }
     });
 
-    // Move the cards left
-    tl.to(scrollContainer, {
-      x: getScrollAmount,
-      ease: 'none'
-    });
+    tl.to(track, { x: getScrollAmount, ease: 'none' }, 0);
 
-    // Move background text
-    if (bgText1 && bgText2) {
-        tl.to(bgText1, { x: '-20%', ease: 'none'}, 0);
-        tl.to(bgText2, { x: '20%', ease: 'none'}, 0);
+    // Counter-parallax background text
+    if (bgWord) {
+      tl.to(bgWord, { x: '-25%', ease: 'none' }, 0);
     }
   }
 </script>

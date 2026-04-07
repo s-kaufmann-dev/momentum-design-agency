@@ -1,0 +1,133 @@
+---
+const services = [
+  { num: "01", title: "Webdesign", sub: "Pixel-perfekte UI-Designs, die konvertieren", desc: "Wir gestalten interfaces, die begeistern. Von der ersten wireframe bis zum finalen pixel — jedes detail sitzt." },
+  { num: "02", title: "Webentwicklung", sub: "Skalierbare Lösungen auf höchstem Niveau", desc: "Astro, Next.js, Three.js — wir nutzen modernste Technologien für maximale Performance und Erlebnis." },
+  { num: "03", title: "Branding", sub: "Identitäten, die im Gedächtnis bleiben", desc: "Logos, Farbwelten, Typografie-Systeme — wir entwickeln visuelle Identitäten die überzeugen." },
+  { num: "04", title: "Motion Design", sub: "Bewegung erzählt deine Geschichte", desc: "GSAP, After Effects, Three.js — kinetische Interfaces und animierte brand assets für den digitalen Raum." },
+  { num: "05", title: "3D & Immersiv", sub: "WebGL-Erlebnisse der nächsten Stufe", desc: "Produktkonfiguratoren, immersive Räume und 3D-Visualisierungen direkt im Browser — ohne App." },
+  { num: "06", title: "SEO & Performance", sub: "Wachstum durch technische Exzellenz", desc: "Core Web Vitals, technisches SEO, Geschwindigkeit — wir machen dich auf allen Kanälen sichtbar." },
+];
+---
+
+<!-- Z-Axis Tunnel Section (pinned) -->
+<div id="services-pin-wrapper" class="relative" style="height: 600vh;">
+  <div id="services-stage" class="sticky top-0 h-screen w-full overflow-hidden bg-[#030303] flex items-center justify-center" style="perspective: 1000px;">
+    
+    <!-- Section label (fixed in view) -->
+    <div class="absolute top-10 left-8 z-30">
+      <p class="text-accent text-[9px] uppercase tracking-[0.5em]">02 / Leistungen</p>
+      <p id="service-counter" class="text-white/20 text-[9px] uppercase tracking-widest mt-1">01 — 06</p>
+    </div>
+
+    <!-- Z-axis tunnel layers -->
+    <div id="tunnel-container" style="transform-style: preserve-3d; position: relative; width: 100%; height: 100%;">
+      {services.map((s, i) => (
+        <div
+          class="tunnel-slide absolute inset-0 flex items-center justify-center"
+          data-index={i}
+          style={`transform: translateZ(${i * -700}px); opacity: ${i === 0 ? 1 : 0};`}
+        >
+          <!-- Background word fragments flying -->
+          <div class="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
+            <span class="text-[35vw] font-black text-white/[0.025] uppercase leading-none select-none whitespace-nowrap">{s.title.charAt(0)}</span>
+          </div>
+          
+          <div class="relative z-10 container mx-auto px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <p class="text-[10vw] font-black text-white/10 leading-none mb-4">{s.num}</p>
+              <h2 class="text-[clamp(3rem,8vw,8rem)] font-black uppercase leading-[0.85] tracking-tighter text-white">
+                {s.title}
+              </h2>
+              <p class="text-accent text-sm uppercase tracking-widest mt-6 mb-8">{s.sub}</p>
+              <p class="text-white/50 text-lg leading-relaxed max-w-lg">{s.desc}</p>
+            </div>
+            
+            <div class="hidden lg:flex flex-col gap-4">
+              {[...Array(3)].map((_, j) => (
+                <div class="h-px bg-white/5 w-full relative overflow-hidden">
+                  <div class="h-full bg-accent/40 absolute left-0 top-0" style={`width: ${33 + j*22}%`}></div>
+                </div>
+              ))}
+              <p class="text-white/20 text-[9px] uppercase tracking-widest mt-4">Leistungstiefe</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <!-- Progress bar -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+      {services.map((_, i) => (
+        <div class={`tunnel-dot w-1 h-1 rounded-full transition-all duration-500 ${i === 0 ? 'bg-accent scale-150' : 'bg-white/20'}`} data-idx={i}></div>
+      ))}
+    </div>
+
+  </div>
+</div>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const wrapper = document.getElementById('services-pin-wrapper');
+  const tunnel = document.getElementById('tunnel-container');
+  const slides = document.querySelectorAll('.tunnel-slide');
+  const dots = document.querySelectorAll('.tunnel-dot');
+  const counter = document.getElementById('service-counter');
+  const N = slides.length;
+  const Z_DIST = 700; // px between slides
+
+  if (wrapper && tunnel && slides.length) {
+    ScrollTrigger.create({
+      trigger: wrapper,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1,
+      onUpdate: (self) => {
+        const rawIdx = self.progress * (N - 0.001);
+        const idx = Math.floor(rawIdx);
+        const frac = rawIdx - idx;
+
+        // Move the entire tunnel in Z
+        const totalZ = self.progress * Z_DIST * (N - 1);
+        gsap.set(tunnel, { translateZ: totalZ });
+
+        // Fade between slides for crossfade
+        slides.forEach((slide, i) => {
+          let opacity = 0;
+          if (i === idx) opacity = 1 - frac;
+          else if (i === idx + 1) opacity = frac;
+          gsap.set(slide, { opacity });
+        });
+
+        // Update dots
+        dots.forEach((dot, i) => {
+          if (i === idx || (frac > 0.5 && i === idx + 1)) {
+            (dot as HTMLElement).classList.add('bg-accent', 'scale-150');
+            (dot as HTMLElement).classList.remove('bg-white/20');
+          } else {
+            (dot as HTMLElement).classList.remove('bg-accent', 'scale-150');
+            (dot as HTMLElement).classList.add('bg-white/20');
+          }
+        });
+
+        // Update counter
+        if (counter) {
+          const n = String(Math.min(idx + 1, N)).padStart(2, '0');
+          counter.textContent = `${n} — ${String(N).padStart(2, '0')}`;
+        }
+      }
+    });
+  }
+</script>
+
+<style>
+  #tunnel-container {
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  #services-stage {
+    perspective: 1200px;
+  }
+</style>

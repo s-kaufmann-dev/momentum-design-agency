@@ -1,110 +1,217 @@
 ---
 ---
-<section id="hero" class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-32">
-  <div id="hero-particles" class="absolute inset-0 pointer-events-none opacity-40"></div>
+<section id="hero" class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+  <!-- Organic WebGL particles background -->
+  <div id="hero-particles" class="absolute inset-0 pointer-events-none opacity-30 z-0"></div>
+
+  <!-- Weather & Time Widget (top right) -->
+  <div id="weather-widget" class="absolute top-8 right-8 z-10 text-right text-white/40 text-[9px] uppercase tracking-widest leading-loose">
+    <div id="time-display" class="text-2xl font-light text-white/70 tracking-widest tabular-nums">--:--</div>
+    <div id="date-display" class="mt-1"></div>
+    <div id="weather-display" class="mt-1"></div>
+    <div id="temp-display"></div>
+  </div>
+
+  <!-- Top logo -->
+  <div class="absolute top-8 left-8 z-10">
+    <p class="text-[10px] uppercase tracking-[0.4em] text-white/40">Momentum / Webagentur / Düsseldorf</p>
+  </div>
+
+  <!-- Main hero content -->
   <div class="container mx-auto px-6 relative z-10">
     <div class="flex flex-col items-center text-center">
-      <p class="text-xs uppercase tracking-[0.4em] mb-8 text-white/50 reveal-text opacity-0 translate-y-10 transition-transform duration-1000">Visionary Design & Elite Talent Roster</p>
-      <h1 id="hero-title" class="text-[15vw] font-[100] leading-[0.8] tracking-tighter uppercase whitespace-nowrap select-none mix-blend-difference cursor-none transition-[font-weight,transform] duration-300 ease-out">
+      <p id="hero-tagline" class="text-[10px] uppercase tracking-[0.5em] mb-10 text-white/40 opacity-0">
+        Wir erschaffen das Internet der Zukunft
+      </p>
+
+      <!-- Reactive variable-weight headline -->
+      <h1 id="hero-title" class="text-[clamp(4rem,16vw,20rem)] font-[100] leading-[0.82] tracking-tighter uppercase text-white select-none cursor-none whitespace-nowrap">
         MOMENTUM
       </h1>
-      <div class="mt-16 flex gap-12 text-[10px] uppercase tracking-widest text-white/30 reveal-text-delay opacity-0 translate-y-10 transition-transform duration-1000">
-         <span>01 / Kinetic Brands</span>
-         <span>02 / Creative Talent</span>
-         <span>03 / Immersive Web</span>
+
+      <!-- Scroll typography — transforms as you scroll -->
+      <div id="hero-subline" class="mt-6 text-[clamp(0.75rem,2.5vw,2rem)] font-light tracking-[0.2em] text-white/30 uppercase opacity-0">
+        Premium Web­design &amp; Digitale Erlebnisse
       </div>
-      
-      <div id="hero-spatial-point" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-accent/20 rounded-full blur-xl animate-pulse pointer-events-none opacity-0 transition-opacity duration-1000 delay-1000"></div>
+
+      <div class="mt-20 flex gap-16 text-[9px] uppercase tracking-[0.4em] text-white/25 opacity-0" id="hero-tags">
+        <span>01 / Webdesign</span>
+        <span>02 / Branding</span>
+        <span>03 / Kinetic UI</span>
+        <span>04 / Development</span>
+      </div>
     </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 opacity-0" id="scroll-ind">
+    <div class="w-px h-16 bg-white/20 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1/2 bg-accent animate-scroll-line"></div>
+    </div>
+    <span class="text-[8px] uppercase tracking-widest text-white/30">Scrollen</span>
   </div>
 </section>
 
 <script>
   import { engine } from '../../lib/engine';
   import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import * as THREE from 'three';
 
-  const heroTitle = document.getElementById('hero-title');
-  const spatialPoint = document.getElementById('hero-spatial-point');
-  const revealElements = document.querySelectorAll('.reveal-text, .reveal-text-delay');
+  gsap.registerPlugin(ScrollTrigger);
+
+  const heroTitle = document.getElementById('hero-title') as HTMLElement;
+  const tagline = document.getElementById('hero-tagline');
+  const subline = document.getElementById('hero-subline');
+  const heroTags = document.getElementById('hero-tags');
+  const scrollInd = document.getElementById('scroll-ind');
   const particleContainer = document.getElementById('hero-particles');
 
-  if (heroTitle && particleContainer) {
-    // Initial Animation
-    gsap.to(revealElements, { 
-      opacity: 1, 
-      y: 0, 
-      stagger: 0.2, 
-      duration: 1.5, 
-      delay: 1, 
-      ease: 'power4.out' 
-    });
-    if (spatialPoint) gsap.to(spatialPoint, { opacity: 1, duration: 2, delay: 2 });
+  // ─── Entrance animation ────────────────────────────────────────
+  const tl = gsap.timeline({ delay: 0.5 });
+  tl.to(tagline, { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' })
+    .fromTo(heroTitle, { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 1.5, ease: 'power4.out' }, '-=0.8')
+    .to(subline, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.6')
+    .to(heroTags, { opacity: 1, duration: 0.8 }, '-=0.3')
+    .to(scrollInd, { opacity: 1, duration: 0.8 }, '-=0.2');
 
-    // WebGL Particles (Organic Dust)
+  // ─── Reactive variable font weight + skew ─────────────────────
+  if (heroTitle) {
+    engine.subscribe(() => {
+      const bounds = heroTitle.getBoundingClientRect();
+      const cx = bounds.left + bounds.width / 2;
+      const cy = bounds.top + bounds.height / 2;
+      const dist = Math.hypot(engine.mouse.lx - cx, engine.mouse.ly - cy);
+      const norm = Math.max(0, Math.min(1, dist / 700));
+      const weight = 900 - norm * 800;
+      const skew = (engine.mouse.lx - cx) / 80;
+      heroTitle.style.fontWeight = `${weight}`;
+      heroTitle.style.transform = `skewX(${skew * 0.3}deg)`;
+    });
+  }
+
+  // ─── Scroll-driven hero typography morph ──────────────────────
+  if (subline) {
+    ScrollTrigger.create({
+      trigger: '#hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      onUpdate: (self) => {
+        const p = self.progress;
+        if (subline) {
+          subline.style.letterSpacing = `${0.2 + p * 0.6}em`;
+          subline.style.opacity = `${1 - p * 1.5}`;
+        }
+        if (heroTitle) {
+          heroTitle.style.opacity = `${1 - p * 2}`;
+        }
+      }
+    });
+  }
+
+  // ─── WebGL Organic Dust Particles ─────────────────────────────
+  if (particleContainer) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
     particleContainer.appendChild(renderer.domElement);
 
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 500;
-    const posArray = new Float32Array(particlesCount * 3);
-
-    for(let i=0; i < particlesCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 10;
+    const count = 800;
+    const positions = new Float32Array(count * 3);
+    const velocities = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 12;
+      velocities[i] = (Math.random() - 0.5) * 0.002;
     }
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-
-    const particlesMaterial = new THREE.PointsMaterial({
-        size: 0.005,
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.5
-    });
-
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
-    camera.position.z = 2;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const mat = new THREE.PointsMaterial({ size: 0.006, color: 0xffffff, transparent: true, opacity: 0.4 });
+    const mesh = new THREE.Points(geo, mat);
+    scene.add(mesh);
+    camera.position.z = 3;
 
     engine.subscribe((time) => {
-        particlesMesh.rotation.y = time * 0.1;
-        particlesMesh.rotation.x = time * 0.05;
-        renderer.render(scene, camera);
-
-        // Reactive Variable Font logic
-        const bounds = heroTitle.getBoundingClientRect();
-        const center = {
-            x: bounds.left + bounds.width / 2,
-            y: bounds.top + bounds.height / 2
-        };
-
-        const dist = Math.sqrt(
-            Math.pow(engine.mouse.lx - center.x, 2) + 
-            Math.pow(engine.mouse.ly - center.y, 2)
-        );
-
-        const maxDist = 800;
-        const norm = Math.max(0, Math.min(1, dist / maxDist));
-        const weight = 900 - (norm * 800);
-        heroTitle.style.fontWeight = `${weight}`;
-        
-        const skew = (engine.mouse.lx - center.x) / 60;
-        heroTitle.style.transform = `skewX(${skew}deg)`;
+      mesh.rotation.y = time * 0.04;
+      mesh.rotation.x = time * 0.02;
+      // Mouse influence on particles
+      mesh.rotation.z = engine.mouse.lx / window.innerWidth * 0.3;
+      renderer.render(scene, camera);
     });
 
     window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
   }
+
+  // ─── Echtzeit Uhr + Wetter (Open-Meteo API) ───────────────────
+  const timeEl = document.getElementById('time-display');
+  const dateEl = document.getElementById('date-display');
+  const weatherEl = document.getElementById('weather-display');
+  const tempEl = document.getElementById('temp-display');
+
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    if (timeEl) timeEl.textContent = `${h}:${m}:${s}`;
+
+    const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    if (dateEl) dateEl.textContent = `${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]}`;
+  }
+
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Open-Meteo API (no key needed, free, Düsseldorf coords)
+  async function fetchWeather() {
+    try {
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.22&longitude=6.77&current_weather=true&temperature_unit=celsius');
+      const data = await res.json();
+      const code = data?.current_weather?.weathercode;
+      const temp = data?.current_weather?.temperature;
+      const windspeed = data?.current_weather?.windspeed;
+
+      const weatherCodes: Record<number, string> = {
+        0: 'Klar', 1: 'Meist klar', 2: 'Teils bewölkt', 3: 'Bedeckt',
+        45: 'Nebel', 48: 'Reifnebel', 51: 'Leichter Nieselregen', 53: 'Nieselregen', 55: 'Starker Niedersch.',
+        61: 'Leichter Regen', 63: 'Regen', 65: 'Starker Regen', 71: 'Leichter Schneefall', 73: 'Schneefall',
+        80: 'Leichte Schauer', 81: 'Schauer', 82: 'Starke Schauer', 95: 'Gewitter',
+      };
+
+      const label = weatherCodes[code] || 'Unbekannt';
+      if (weatherEl) weatherEl.textContent = `${label}`;
+      if (tempEl) tempEl.textContent = `${temp}°C / Wind ${windspeed} km/h`;
+
+      // Apply dynamic CSS variables based on weather
+      if (code === 0 || code === 1) {
+        document.documentElement.style.setProperty('--accent', '#ff4d00'); // Clear → orange
+      } else if (code >= 61 && code <= 65) {
+        document.documentElement.style.setProperty('--accent', '#4da6ff'); // Rain → blue
+      } else if (code >= 71 && code <= 73) {
+        document.documentElement.style.setProperty('--accent', '#a0cfff'); // Snow → ice blue
+      }
+    } catch { /* fail silently */ }
+  }
+
+  fetchWeather();
+  setInterval(fetchWeather, 600000); // Refresh every 10min
 </script>
 
 <style>
-  #hero-title {
-    will-change: font-weight, transform;
-    font-variant-ligatures: none;
+  #hero-title { will-change: font-weight, transform; font-variant-ligatures: none; }
+  
+  @keyframes scroll-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(200%); }
+  }
+  .animate-scroll-line {
+    animation: scroll-line 1.5s ease-in-out infinite;
   }
 </style>
