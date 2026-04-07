@@ -42,8 +42,8 @@ const team = [
 <section id="team-section" class="relative bg-[#070707]">
   
   <!-- Pinned horizontal scroll wrapper -->
-  <div id="team-pin-wrapper" class="relative" style="height: 250vh;">
-    <div id="team-stage" class="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center">
+  <div id="team-pin-wrapper" class="relative w-full">
+    <div id="team-stage" class="h-screen w-full overflow-hidden flex flex-col justify-center">
       
       <!-- Section header -->
       <div class="absolute top-10 left-8 z-20">
@@ -115,10 +115,11 @@ const team = [
 
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: wrapper,
+        trigger: '#team-pin-wrapper',
+        pin: '#team-stage',
         start: 'top top',
-        end: 'bottom bottom',
-        scrub: 1.5,
+        end: () => `+=${track.scrollWidth}`, // Scroll amount matches track width
+        scrub: true, // Reduced scrubbing delay to remove "laggy" feel
         invalidateOnRefresh: true,
       }
     });

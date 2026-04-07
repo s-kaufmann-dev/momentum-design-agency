@@ -10,8 +10,8 @@ const services = [
 ---
 
 <!-- Z-Axis Tunnel Section (pinned) -->
-<div id="services-pin-wrapper" class="relative" style="height: 600vh;">
-  <div id="services-stage" class="sticky top-0 h-screen w-full overflow-hidden bg-[#030303] flex items-center justify-center" style="perspective: 1000px;">
+<div id="services-pin-wrapper" class="relative w-full">
+  <div id="services-stage" class="h-screen w-full overflow-hidden bg-[#030303] flex items-center justify-center" style="perspective: 1000px;">
     
     <!-- Section label (fixed in view) -->
     <div class="absolute top-10 left-8 z-30">
@@ -81,9 +81,10 @@ const services = [
   if (wrapper && tunnel && slides.length) {
     ScrollTrigger.create({
       trigger: wrapper,
+      pin: '#services-stage',
       start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1,
+      end: '+=400%', // Pin for exactly 4 viewport heights of scrolling
+      scrub: true, // Use instant scrub to avoid double-smoothing lag with Lenis
       onUpdate: (self) => {
         const rawIdx = self.progress * (N - 0.001);
         const idx = Math.floor(rawIdx);
