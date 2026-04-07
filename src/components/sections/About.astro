@@ -1,0 +1,55 @@
+---
+---
+<section id="about" class="bg-black text-white py-48 min-h-screen flex items-center">
+  <div class="container mx-auto px-6">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-accent text-xs uppercase tracking-[0.4em] mb-12">02 / The Manifesto</p>
+      
+      <div id="about-text-container" class="text-4xl md:text-6xl font-light leading-tight tracking-tight uppercase">
+        We do not just build websites.<br/>
+        We engineer <span class="font-black">digital velocity</span>.<br/><br/>
+        Momentum is an exclusive nexus where visionary brands meet the world's most <span class="italic text-accent">elite creative talent</span>. We blur the line between utility and art, crafting interactive spaces that leave a lasting physical impact on the digital plane.
+      </div>
+
+      <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/10 pt-16">
+        <div>
+          <h4 class="text-3xl font-bold mb-4">01. Strategy</h4>
+          <p class="text-white/50 text-sm uppercase tracking-widest leading-relaxed">We decode your brand DNA to engineer concepts that command attention.</p>
+        </div>
+        <div>
+          <h4 class="text-3xl font-bold mb-4">02. Talent</h4>
+          <p class="text-white/50 text-sm uppercase tracking-widest leading-relaxed">Our roster features highly vetted Creative Directors and WebGL artists.</p>
+        </div>
+        <div>
+          <h4 class="text-3xl font-bold mb-4">03. Motion</h4>
+          <p class="text-white/50 text-sm uppercase tracking-widest leading-relaxed">Kinetic interactions that transform static screens into living ecosystems.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const aboutText = document.getElementById('about-text-container');
+  if (aboutText) {
+    // A simple yet effective text reveal
+    gsap.fromTo(aboutText, 
+      { opacity: 0, y: 50 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1.5, 
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: aboutText,
+          start: 'top 80%',
+        }
+      }
+    );
+  }
+</script>

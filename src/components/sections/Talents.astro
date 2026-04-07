@@ -1,0 +1,106 @@
+---
+const talents = [
+  {
+    name: "Elena Rostova",
+    role: "WebGL Artist / VFX",
+    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
+    desc: "Sculpting digital physics."
+  },
+  {
+    name: "Marcus Thorne",
+    role: "Creative Director",
+    img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop",
+    desc: "Orchestrating brand chaos."
+  },
+  {
+    name: "Jin Sato",
+    role: "Motion Typographer",
+    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
+    desc: "Breathing life into words."
+  },
+  {
+    name: "Aria Vance",
+    role: "Immersive Architect",
+    img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
+    desc: "Spatial sound & 3D Web."
+  }
+];
+---
+<section id="talents-wrapper" class="relative bg-[#050505] overflow-hidden">
+  
+  <div id="talents-pinned" class="h-screen w-full flex flex-col justify-center relative">
+    
+    <!-- Background Typography that moves opposite to scroll -->
+    <div class="absolute inset-0 flex flex-col justify-between py-24 pointer-events-none opacity-5 overflow-hidden">
+        <h2 id="bg-text-1" class="text-[20vw] font-black uppercase whitespace-nowrap leading-none font-sans">ELITE ROSTER ELITE ROSTER</h2>
+        <h2 id="bg-text-2" class="text-[20vw] font-black uppercase whitespace-nowrap leading-none font-sans text-right translates-x-1/2">CREATIVE TALENT CREATIVE</h2>
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="mb-16">
+        <p class="text-accent text-xs uppercase tracking-[0.4em] mb-4">03 / The Roster</p>
+        <h2 class="text-6xl font-black tracking-tighter uppercase leading-none">Our<br/>Talents</h2>
+      </div>
+
+      <!-- Horizontal Scroll Container -->
+      <div id="talents-scroll-container" class="flex gap-12 w-max">
+        {talents.map((t) => (
+          <div class="w-[300px] md:w-[450px] flex-shrink-0 group cursor-pointer" data-magnetic>
+            <div class="overflow-hidden aspect-[3/4] relative mb-6">
+                <img src={t.img} alt={t.name} class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                <div class="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 mix-blend-overlay transition-opacity duration-500"></div>
+            </div>
+            <h3 class="text-3xl font-black uppercase tracking-tight">{t.name}</h3>
+            <p class="text-accent text-[10px] uppercase tracking-widest font-bold mt-2">{t.role}</p>
+            <p class="text-white/50 text-sm uppercase tracking-widest mt-4 italic">"{t.desc}"</p>
+          </div>
+        ))}
+        <!-- Spacer for the end -->
+        <div class="w-[10vw]"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const wrapper = document.getElementById('talents-wrapper');
+  const pinned = document.getElementById('talents-pinned');
+  const scrollContainer = document.getElementById('talents-scroll-container');
+  const bgText1 = document.getElementById('bg-text-1');
+  const bgText2 = document.getElementById('bg-text-2');
+
+  if (wrapper && pinned && scrollContainer) {
+    
+    // Calculate how far to move left
+    const getScrollAmount = () => -(scrollContainer.scrollWidth - window.innerWidth);
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: wrapper,
+        start: 'top top',
+        end: () => `+=${scrollContainer.scrollWidth}`, // Scroll duration equals width
+        pin: pinned,
+        scrub: 1,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    // Move the cards left
+    tl.to(scrollContainer, {
+      x: getScrollAmount,
+      ease: 'none'
+    });
+
+    // Move background text
+    if (bgText1 && bgText2) {
+        tl.to(bgText1, { x: '-20%', ease: 'none'}, 0);
+        tl.to(bgText2, { x: '20%', ease: 'none'}, 0);
+    }
+  }
+</script>

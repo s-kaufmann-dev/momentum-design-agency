@@ -23,18 +23,18 @@
       
       // Global UI sounds
       const hoverSound = new Howl({
-        src: ['https://cdn.pixabay.com/audio/2022/03/15/audio_73859600e5.mp3'], // Placeholder mechanical click
+        src: ['/audio/hover.mp3'], // Local hover
         volume: 0.1,
       });
 
       const clickSound = new Howl({
-        src: ['https://cdn.pixabay.com/audio/2022/03/10/audio_5b306b677a.mp3'], // Heavy click
+        src: ['/audio/click.mp3'], // Local heavy click
         volume: 0.2,
       });
 
-      // Background Ambient (Lowpass)
+      // Background Ambient
       const ambient = new Howl({
-        src: ['https://cdn.pixabay.com/audio/2022/01/21/audio_0344d32f41.mp3'], // Abstract dark ambient
+        src: ['/audio/ambient.mp3'], // Local dark ambient
         autoplay: true,
         loop: true,
         volume: 0.3,
