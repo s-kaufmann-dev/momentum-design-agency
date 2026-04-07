@@ -34,10 +34,9 @@ const { title, description = "Momentum Design - High-End Digital Agency" } = Ast
                     document.body.classList.add('night-theme');
                     document.documentElement.style.setProperty('--bg', '#050505');
                     document.documentElement.style.setProperty('--fg', '#dcdcdc');
-                } else if (hour > 10 && hour < 14) {
-                    // Noon sharpness
-                    document.documentElement.style.setProperty('--bg', '#ffffff');
-                    document.documentElement.style.setProperty('--fg', '#111111');
+                } else {
+                    document.documentElement.style.setProperty('--bg', '#0a0a0a');
+                    document.documentElement.style.setProperty('--fg', '#f5f5f5');
                 }
             });
         </script>
