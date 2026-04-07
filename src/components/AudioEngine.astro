@@ -72,14 +72,12 @@
       pannerNode.connect(lowpassFilter);
       lowpassFilter.connect(audioCtx.destination);
 
-      // Wire Howler into our chain
-      Howler.ctx = audioCtx;
+      // Wire Howler into our chain — do NOT disconnect masterGain,
+      // just connect it additionally to our panner for spatial effect
       try {
-        Howler.masterGain.disconnect();
         Howler.masterGain.connect(pannerNode);
       } catch(e) {
-        // If disconnect fails, just connect directly
-        Howler.masterGain.connect(pannerNode);
+        console.log('Spatial audio chain unavailable, using direct output');
       }
 
       // ─── Load sounds with fallback URLs ─────────────────────────
