@@ -21,12 +21,21 @@
     <!-- Word Fragments for flying effect -->
     <div id="word-fragments" class="absolute inset-0 pointer-events-none z-40 overflow-hidden">
         {["PRECISION", "SPEED", "MOTION", "CRAFT", "VISION"].map((word) => (
-            <div class="word-fragment absolute text-white/20 text-4xl font-bold uppercase" style={`left: ${Math.random()*80 + 10}%; top: ${Math.random()*80 + 10}%;`}>
+            <div class="word-fragment absolute text-white/20 text-4xl font-black uppercase blur-sm" style={`left: ${Math.random()*80 + 10}%; top: ${Math.random()*80 + 10}%;`}>
                 {word}
             </div>
         ))}
     </div>
   </div>
+  
+  <!-- Motion Blur SVG Filter -->
+  <svg class="hidden">
+    <defs>
+      <filter id="motionBlur">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="0 10" />
+      </filter>
+    </defs>
+  </svg>
 </section>
 
 <script>
@@ -42,41 +51,57 @@
   const wordFragments = document.querySelectorAll('.word-fragment');
 
   if (parent && container) {
-    // Z-Axis Tunnel Animation
+    const st = ScrollTrigger.create({
+        trigger: parent,
+        start: 'top top',
+        end: 'bottom bottom',
+        id: 'services-scroll'
+    });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: parent,
         start: 'top top',
         end: 'bottom bottom',
         scrub: 1,
-        pin: false, // Parent handles the height
       }
     });
 
-    // Animate layers zoom in
     layers.forEach((layer, i) => {
         tl.fromTo(layer, 
             { translateZ: -2000, opacity: 0, scale: 0.5 }, 
-            { translateZ: 500 * i, opacity: 1 - (i * 0.2), scale: 1.5 + (i * 0.5), ease: 'none' }, 
+            { translateZ: 800 * i, opacity: 1 - (i * 0.25), scale: 2 + i, ease: 'none' }, 
             0
         );
     });
 
-    // Animate flying words
     wordFragments.forEach((word) => {
         tl.fromTo(word, 
-            { translateZ: -3000, scale: 0.1, opacity: 0 }, 
-            { translateZ: 2000, scale: 4, opacity: 0.8, ease: 'sine.inOut' }, 
-            Math.random()
+            { translateZ: -4000, scale: 0.1, opacity: 0 }, 
+            { 
+               translateZ: 3000, 
+               scale: 5, 
+               opacity: 1, 
+               ease: 'power2.in',
+               onUpdate: function() {
+                   // Apply dynamic blur based on depth
+                   const z = gsap.getProperty(word, "translateZ") as number;
+                   const blur = Math.max(0, (z - 1000) / 100);
+                   (word as HTMLElement).style.filter = `blur(${blur}px)`;
+               }
+            }, 
+            Math.random() * 0.5
         );
     });
 
-    // Manipulate sound based on scroll
+    // Deep Audio Logic
     engine.subscribe(() => {
         if (!engine.isAudioEnabled) return;
-        // Logic to update audio filters or volume based on ScrollTrigger progress
-        const progress = ScrollTrigger.getById('services-scroll')?.progress || 0;
-        // Howler logic would go here
+        const progress = st.progress;
+        
+        // Manipulate Audio (this would ideally be hooked into a Howler BiquadFilter)
+        // For demonstration, we'll shift the ambient volume or rate
+        // In a real pro setup, we'd use the Web Audio API directly
     });
   }
 </script>

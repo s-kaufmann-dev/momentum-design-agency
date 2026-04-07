@@ -1,10 +1,11 @@
 ---
 ---
 <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-32">
+  <div id="hero-particles" class="absolute inset-0 pointer-events-none opacity-40"></div>
   <div class="container mx-auto px-6 relative z-10">
     <div class="flex flex-col items-center text-center">
       <p class="text-xs uppercase tracking-[0.4em] mb-8 text-white/50 reveal-text opacity-0 translate-y-10 transition-transform duration-1000">The Modern Creative Standard</p>
-      <h1 id="hero-title" class="text-[15vw] font-[100] leading-[0.8] tracking-tighter uppercase whitespace-nowrap select-none mix-blend-difference cursor-none">
+      <h1 id="hero-title" class="text-[15vw] font-[100] leading-[0.8] tracking-tighter uppercase whitespace-nowrap select-none mix-blend-difference cursor-none transition-[font-weight,transform] duration-300 ease-out">
         MOMENTUM
       </h1>
       <div class="mt-16 flex gap-12 text-[10px] uppercase tracking-widest text-white/30 reveal-text-delay opacity-0 translate-y-10 transition-transform duration-1000">
@@ -21,12 +22,14 @@
 <script>
   import { engine } from '../../lib/engine';
   import gsap from 'gsap';
+  import * as THREE from 'three';
 
   const heroTitle = document.getElementById('hero-title');
   const spatialPoint = document.getElementById('hero-spatial-point');
   const revealElements = document.querySelectorAll('.reveal-text, .reveal-text-delay');
+  const particleContainer = document.getElementById('hero-particles');
 
-  if (heroTitle) {
+  if (heroTitle && particleContainer) {
     // Initial Animation
     gsap.to(revealElements, { 
       opacity: 1, 
@@ -38,7 +41,38 @@
     });
     if (spatialPoint) gsap.to(spatialPoint, { opacity: 1, duration: 2, delay: 2 });
 
-    engine.subscribe(() => {
+    // WebGL Particles (Organic Dust)
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    particleContainer.appendChild(renderer.domElement);
+
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 500;
+    const posArray = new Float32Array(particlesCount * 3);
+
+    for(let i=0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 10;
+    }
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.005,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.5
+    });
+
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+    camera.position.z = 2;
+
+    engine.subscribe((time) => {
+        particlesMesh.rotation.y = time * 0.1;
+        particlesMesh.rotation.x = time * 0.05;
+        renderer.render(scene, camera);
+
         // Reactive Variable Font logic
         const bounds = heroTitle.getBoundingClientRect();
         const center = {
@@ -51,17 +85,19 @@
             Math.pow(engine.mouse.ly - center.y, 2)
         );
 
-        // Normalize distance
         const maxDist = 800;
         const norm = Math.max(0, Math.min(1, dist / maxDist));
-        
-        // Map to Weight (100 to 900)
         const weight = 900 - (norm * 800);
         heroTitle.style.fontWeight = `${weight}`;
         
-        // Map to Skew/Motion
-        const skew = (engine.mouse.lx - center.x) / 50;
+        const skew = (engine.mouse.lx - center.x) / 60;
         heroTitle.style.transform = `skewX(${skew}deg)`;
+    });
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     });
   }
 </script>

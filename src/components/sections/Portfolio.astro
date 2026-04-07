@@ -3,44 +3,61 @@ const projects = [
   { 
     title: "Vanguard", 
     category: "Branding", 
-    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" 
+    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
+    size: "col-span-2 row-span-2"
   },
   { 
     title: "Apex Nexus", 
     category: "Kinetic UI", 
-    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop" 
+    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop",
+    size: "col-span-1 row-span-1"
   },
   { 
     title: "Cipher Core", 
     category: "Immersive Web", 
-    img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop" 
+    img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop",
+    size: "col-span-1 row-span-2"
+  },
+  { 
+    title: "Elysium", 
+    category: "Design System", 
+    img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1000&auto=format&fit=crop",
+    size: "col-span-1 row-span-1"
   }
 ];
 ---
-<section id="portfolio" class="bg-[#050505] py-32 min-h-screen">
+<section id="portfolio" class="bg-[#050505] py-48 min-h-screen">
   <div class="container mx-auto px-6">
-    <div class="mb-24 flex justify-between items-end">
-      <h2 class="text-7xl font-bold tracking-tighter uppercase">Selected Works</h2>
-      <p class="text-xs uppercase tracking-widest text-white/40 mb-2">01 / Portfolio</p>
+    <div class="mb-32 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+      <div>
+        <p class="text-accent text-xs uppercase tracking-[0.4em] mb-4">01 / Portfolio</p>
+        <h2 class="text-8xl font-black tracking-tighter uppercase leading-none">Selected<br/>Works</h2>
+      </div>
+      <p class="max-w-xs text-white/40 text-sm leading-relaxed uppercase tracking-widest">Pushing the boundaries of digital kineticism through precise design and motion.</p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-8 md:gap-12">
       {projects.map((p, i) => (
         <div 
-          class={`portfolio-card group relative cursor-pointer overflow-hidden aspect-[4/5] bg-neutral-900 ${i % 2 !== 0 ? 'md:mt-32' : ''}`}
+          class={`portfolio-card group relative cursor-pointer overflow-hidden bg-neutral-900 ${p.size}`}
           data-magnetic
         >
-          <div class="image-container absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-            <img 
-               src={p.img} 
-               alt={p.title} 
-               class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-[filter] duration-700" 
-               data-distort
-            />
+          <div class="image-reveal absolute inset-0 overflow-hidden">
+            <div class="image-container absolute inset-0 transition-transform duration-700 group-hover:scale-110">
+              <img 
+                 src={p.img} 
+                 alt={p.title} 
+                 class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-[filter] duration-1000" 
+                 data-distort
+              />
+            </div>
+            <!-- Glass Reflection Layer -->
+            <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
           </div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 p-8 flex flex-col justify-end">
-             <p class="text-accent text-[10px] uppercase font-bold tracking-widest mb-1">{p.category}</p>
-             <h3 class="text-3xl font-bold uppercase tracking-tighter">{p.title}</h3>
+          
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-8 flex flex-col justify-end backdrop-blur-[2px]">
+             <p class="text-accent text-[10px] uppercase font-black tracking-[0.3em] mb-2">{p.category}</p>
+             <h3 class="text-4xl font-black uppercase tracking-tighter transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{p.title}</h3>
           </div>
         </div>
       ))}
@@ -51,10 +68,29 @@ const projects = [
 <script>
   import { engine } from '../../lib/engine';
   import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-  // 3D Tilt Logic
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Reveal Animations
+  const reveals = document.querySelectorAll('.image-reveal');
+  reveals.forEach(reveal => {
+    gsap.fromTo(reveal, 
+      { clipPath: 'inset(100% 0% 0% 0%)' },
+      { 
+        clipPath: 'inset(0% 0% 0% 0%)', 
+        duration: 2, 
+        ease: 'power4.inOut',
+        scrollTrigger: {
+            trigger: reveal,
+            start: 'top 90%',
+        }
+      }
+    );
+  });
+
+  // 3D Tilt Logic Refined
   const cards = document.querySelectorAll('.portfolio-card');
-  
   cards.forEach(card => {
     const el = card as HTMLElement;
     
@@ -66,13 +102,11 @@ const projects = [
       const xPercent = (mouseX / bounds.width - 0.5) * 2;
       const yPercent = (mouseY / bounds.height - 0.5) * 2;
       
-      const rotateX = -yPercent * 10;
-      const rotateY = xPercent * 10;
-      
       gsap.to(el, {
-        rotateX: rotateX,
-        rotateY: rotateY,
-        duration: 0.5,
+        rotateX: -yPercent * 15,
+        rotateY: xPercent * 15,
+        scale: 1.02,
+        duration: 0.6,
         ease: 'power2.out'
       });
     });
@@ -81,12 +115,21 @@ const projects = [
       gsap.to(el, {
         rotateX: 0,
         rotateY: 0,
-        duration: 0.8,
-        ease: 'elastic.out(1, 0.5)'
+        scale: 1,
+        duration: 1,
+        ease: 'elastic.out(1, 0.6)'
       });
     });
   });
 </script>
+
+<style>
+  .portfolio-card {
+    perspective: 1500px;
+    transform-style: preserve-3d;
+    will-change: transform, clip-path;
+  }
+</style>
 
 <style>
   .portfolio-card {

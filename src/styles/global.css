@@ -9,17 +9,55 @@
   --font-main: 'Outfit', sans-serif;
   --mouse-x: 0px;
   --mouse-y: 0px;
+  
+  /* Fluid Typo Scales */
+  --fluid-h1: clamp(4rem, 15vw, 20rem);
+  --fluid-h2: clamp(2.5rem, 8vw, 12rem);
+  --fluid-h3: clamp(1.5rem, 4vw, 6rem);
 }
 
-/* Time-based shifts will be handled by JS updating these variables */
 body {
   background-color: var(--bg);
   color: var(--fg);
   font-family: var(--font-main);
   margin: 0;
   overflow-x: hidden;
-  transition: background-color 0.8s ease, color 0.8s ease;
+  transition: background-color 1.2s cubic-bezier(0.65, 0, 0.35, 1), color 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Noise Grain Overlay */
+body::after {
+  content: "";
+  position: fixed;
+  top: -150%;
+  left: -150%;
+  width: 300%;
+  height: 300%;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 9999;
+  animation: noise-move 8s steps(10) infinite;
+}
+
+@keyframes noise-move {
+  0% { transform: translate(0,0); }
+  10% { transform: translate(-5%,-5%); }
+  20% { transform: translate(-10%,5%); }
+  30% { transform: translate(5%,-10%); }
+  40% { transform: translate(-5%,15%); }
+  50% { transform: translate(-10%,5%); }
+  60% { transform: translate(15%,0); }
+  70% { transform: translate(0,10%); }
+  80% { transform: translate(-15%,0); }
+  90% { transform: translate(10%,5%); }
+  100% { transform: translate(5%,0); }
+}
+
+h1 { font-size: var(--fluid-h1); line-height: 0.85; font-weight: 100; letter-spacing: -0.05em; }
+h2 { font-size: var(--fluid-h2); line-height: 0.9; font-weight: 800; letter-spacing: -0.03em; }
+h3 { font-size: var(--fluid-h3); line-height: 1; font-weight: 700; letter-spacing: -0.02em; }
 
 canvas#webgl {
   position: fixed;
