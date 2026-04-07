@@ -1,0 +1,74 @@
+---
+---
+<section id="hero" class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-32">
+  <div class="container mx-auto px-6 relative z-10">
+    <div class="flex flex-col items-center text-center">
+      <p class="text-xs uppercase tracking-[0.4em] mb-8 text-white/50 reveal-text opacity-0 translate-y-10 transition-transform duration-1000">The Modern Creative Standard</p>
+      <h1 id="hero-title" class="text-[15vw] font-[100] leading-[0.8] tracking-tighter uppercase whitespace-nowrap select-none mix-blend-difference cursor-none">
+        MOMENTUM
+      </h1>
+      <div class="mt-16 flex gap-12 text-[10px] uppercase tracking-widest text-white/30 reveal-text-delay opacity-0 translate-y-10 transition-transform duration-1000">
+         <span>01 / Kinetic Design</span>
+         <span>02 / Immersive Brand</span>
+         <span>03 / Precise Motion</span>
+      </div>
+      
+      <div id="hero-spatial-point" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-accent/20 rounded-full blur-xl animate-pulse pointer-events-none opacity-0 transition-opacity duration-1000 delay-1000"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { engine } from '../../lib/engine';
+  import gsap from 'gsap';
+
+  const heroTitle = document.getElementById('hero-title');
+  const spatialPoint = document.getElementById('hero-spatial-point');
+  const revealElements = document.querySelectorAll('.reveal-text, .reveal-text-delay');
+
+  if (heroTitle) {
+    // Initial Animation
+    gsap.to(revealElements, { 
+      opacity: 1, 
+      y: 0, 
+      stagger: 0.2, 
+      duration: 1.5, 
+      delay: 1, 
+      ease: 'power4.out' 
+    });
+    if (spatialPoint) gsap.to(spatialPoint, { opacity: 1, duration: 2, delay: 2 });
+
+    engine.subscribe(() => {
+        // Reactive Variable Font logic
+        const bounds = heroTitle.getBoundingClientRect();
+        const center = {
+            x: bounds.left + bounds.width / 2,
+            y: bounds.top + bounds.height / 2
+        };
+
+        const dist = Math.sqrt(
+            Math.pow(engine.mouse.lx - center.x, 2) + 
+            Math.pow(engine.mouse.ly - center.y, 2)
+        );
+
+        // Normalize distance
+        const maxDist = 800;
+        const norm = Math.max(0, Math.min(1, dist / maxDist));
+        
+        // Map to Weight (100 to 900)
+        const weight = 900 - (norm * 800);
+        heroTitle.style.fontWeight = `${weight}`;
+        
+        // Map to Skew/Motion
+        const skew = (engine.mouse.lx - center.x) / 50;
+        heroTitle.style.transform = `skewX(${skew}deg)`;
+    });
+  }
+</script>
+
+<style>
+  #hero-title {
+    will-change: font-weight, transform;
+    font-variant-ligatures: none;
+  }
+</style>

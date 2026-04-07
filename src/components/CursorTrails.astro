@@ -1,0 +1,74 @@
+---
+---
+<canvas id="cursor-trails-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-40"></canvas>
+
+<script>
+  import { engine } from '../lib/engine';
+
+  const canvas = document.getElementById('cursor-trails-canvas') as HTMLCanvasElement;
+  const ctx = canvas?.getContext('2d');
+
+  if (canvas && ctx) {
+    let particles: Particle[] = [];
+
+    class Particle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      alpha: number;
+      size: number;
+
+      constructor(x: number, y: number, vx: number, vy: number) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx * 0.2;
+        this.vy = vy * 0.2;
+        this.alpha = 1;
+        this.size = Math.random() * 2 + 1;
+      }
+
+      update(delta: number) {
+        this.x += this.vx * (delta / 16);
+        this.y += this.vy * (delta / 16);
+        this.alpha -= 0.02 * (delta / 16);
+      }
+
+      draw() {
+        if (ctx) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 77, 0, ${this.alpha * 0.5})`; // Momentum Orange
+          ctx.fill();
+        }
+      }
+    }
+
+    const resize = () => {
+      canvas.width = window.innerWidth * engine.viewport.pixelRatio;
+      canvas.height = window.innerHeight * engine.viewport.pixelRatio;
+      ctx.scale(engine.viewport.pixelRatio, engine.viewport.pixelRatio);
+    };
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    engine.subscribe((time, delta) => {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Add particle on movement
+      const velocity = Math.sqrt(engine.mouse.vx ** 2 + engine.mouse.vy ** 2);
+      if (velocity > 2) {
+        particles.push(new Particle(engine.mouse.x, engine.mouse.y, engine.mouse.vx, engine.mouse.vy));
+      }
+
+      // Update and draw particles
+      particles = particles.filter(p => {
+        p.update(delta);
+        p.draw();
+        return p.alpha > 0;
+      });
+    });
+  }
+</script>

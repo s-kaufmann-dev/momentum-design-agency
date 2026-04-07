@@ -1,0 +1,65 @@
+---
+---
+<div id="cursor-container" class="fixed top-0 left-0 w-full h-full pointer-events-none z-50">
+  <div id="cursor-main" class="w-6 h-6 border border-white/50 rounded-full flex items-center justify-center mix-blend-difference overflow-hidden">
+    <div id="cursor-dot" class="w-1 h-1 bg-white rounded-full"></div>
+  </div>
+</div>
+
+<script>
+  import { engine } from '../lib/engine';
+  import gsap from 'gsap';
+
+  const cursorMain = document.getElementById('cursor-main');
+  const cursorDot = document.getElementById('cursor-dot');
+  
+  if (cursorMain && cursorDot) {
+    // Initial hide
+    gsap.set(cursorMain, { opacity: 0 });
+
+    engine.subscribe(() => {
+      // Basic movement
+      gsap.set(cursorMain, {
+        x: engine.mouse.lx - 12, // Center cursor (12 is half of 24)
+        y: engine.mouse.lx - 12, 
+        // Wait, I mean engine.mouse.ly
+        opacity: 1
+      });
+      // Correcting coordinates
+      cursorMain.style.transform = `translate3d(${engine.mouse.lx - 12}px, ${engine.mouse.ly - 12}px, 0)`;
+      
+      // Dynamic scaling based on velocity
+      const velocity = Math.sqrt(engine.mouse.vx ** 2 + engine.mouse.vy ** 2);
+      const scaleX = 1 + velocity * 0.05;
+      const scaleY = 1 - velocity * 0.05;
+      const rotation = Math.atan2(engine.mouse.vy, engine.mouse.vx) * (180 / Math.PI);
+      
+      cursorMain.style.transform += ` rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;
+    });
+
+    // Magnetic logic for interactive elements
+    const updateMagnets = () => {
+        const magnets = document.querySelectorAll('[data-magnetic]');
+        magnets.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursorMain, { scale: 2.5, duration: 0.3 });
+                gsap.to(cursorDot, { opacity: 0, duration: 0.2 });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursorMain, { scale: 1, duration: 0.3 });
+                gsap.to(cursorDot, { opacity: 1, duration: 0.2 });
+            });
+        });
+    };
+
+    // Re-scan magnets periodically or on DOM change
+    updateMagnets();
+  }
+</script>
+
+<style>
+  #cursor-main {
+    will-change: transform;
+    transition: width 0.3s, height 0.3s, background-color 0.3s;
+  }
+</style>

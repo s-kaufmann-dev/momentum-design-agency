@@ -1,0 +1,93 @@
+---
+---
+<section id="services-parent" class="relative bg-black min-h-[400vh] overflow-hidden">
+  <div id="services-container" class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+    <!-- Tunnel Layers -->
+    <div class="tunnel-layer absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+       <span class="text-[20vw] font-bold text-white/5 tracking-tighter uppercase whitespace-nowrap">IDEATION</span>
+    </div>
+    <div class="tunnel-layer absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+       <span class="text-[15vw] font-bold text-white/10 tracking-tighter uppercase whitespace-nowrap">DYNAMICS</span>
+    </div>
+    <div class="tunnel-layer absolute inset-0 z-30 flex flex-col items-center justify-center">
+       <div class="max-w-4xl text-center px-6">
+         <h2 id="service-main-text" class="text-8xl font-black uppercase tracking-tighter leading-tight drop-shadow-2xl">
+           Transforming <span class="text-accent underline">Vision</span> into Momentum.
+         </h2>
+         <p class="mt-8 text-xl text-white/60 tracking-wide uppercase font-light">Kinetic Branding / Digital Products / Immersive Space</p>
+       </div>
+    </div>
+    
+    <!-- Word Fragments for flying effect -->
+    <div id="word-fragments" class="absolute inset-0 pointer-events-none z-40 overflow-hidden">
+        {["PRECISION", "SPEED", "MOTION", "CRAFT", "VISION"].map((word) => (
+            <div class="word-fragment absolute text-white/20 text-4xl font-bold uppercase" style={`left: ${Math.random()*80 + 10}%; top: ${Math.random()*80 + 10}%;`}>
+                {word}
+            </div>
+        ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { engine } from '../../lib/engine';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const container = document.getElementById('services-container');
+  const parent = document.getElementById('services-parent');
+  const layers = document.querySelectorAll('.tunnel-layer');
+  const wordFragments = document.querySelectorAll('.word-fragment');
+
+  if (parent && container) {
+    // Z-Axis Tunnel Animation
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: parent,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1,
+        pin: false, // Parent handles the height
+      }
+    });
+
+    // Animate layers zoom in
+    layers.forEach((layer, i) => {
+        tl.fromTo(layer, 
+            { translateZ: -2000, opacity: 0, scale: 0.5 }, 
+            { translateZ: 500 * i, opacity: 1 - (i * 0.2), scale: 1.5 + (i * 0.5), ease: 'none' }, 
+            0
+        );
+    });
+
+    // Animate flying words
+    wordFragments.forEach((word) => {
+        tl.fromTo(word, 
+            { translateZ: -3000, scale: 0.1, opacity: 0 }, 
+            { translateZ: 2000, scale: 4, opacity: 0.8, ease: 'sine.inOut' }, 
+            Math.random()
+        );
+    });
+
+    // Manipulate sound based on scroll
+    engine.subscribe(() => {
+        if (!engine.isAudioEnabled) return;
+        // Logic to update audio filters or volume based on ScrollTrigger progress
+        const progress = ScrollTrigger.getById('services-scroll')?.progress || 0;
+        // Howler logic would go here
+    });
+  }
+</script>
+
+<style>
+  #services-container {
+    perspective: 2000px;
+    background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+  }
+  .tunnel-layer, .word-fragment {
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+  }
+</style>

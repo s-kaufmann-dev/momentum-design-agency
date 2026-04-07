@@ -1,0 +1,96 @@
+---
+const projects = [
+  { 
+    title: "Vanguard", 
+    category: "Branding", 
+    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" 
+  },
+  { 
+    title: "Apex Nexus", 
+    category: "Kinetic UI", 
+    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop" 
+  },
+  { 
+    title: "Cipher Core", 
+    category: "Immersive Web", 
+    img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1000&auto=format&fit=crop" 
+  }
+];
+---
+<section id="portfolio" class="bg-[#050505] py-32 min-h-screen">
+  <div class="container mx-auto px-6">
+    <div class="mb-24 flex justify-between items-end">
+      <h2 class="text-7xl font-bold tracking-tighter uppercase">Selected Works</h2>
+      <p class="text-xs uppercase tracking-widest text-white/40 mb-2">01 / Portfolio</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+      {projects.map((p, i) => (
+        <div 
+          class={`portfolio-card group relative cursor-pointer overflow-hidden aspect-[4/5] bg-neutral-900 ${i % 2 !== 0 ? 'md:mt-32' : ''}`}
+          data-magnetic
+        >
+          <div class="image-container absolute inset-0 transition-transform duration-700 group-hover:scale-105">
+            <img 
+               src={p.img} 
+               alt={p.title} 
+               class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-[filter] duration-700" 
+               data-distort
+            />
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 p-8 flex flex-col justify-end">
+             <p class="text-accent text-[10px] uppercase font-bold tracking-widest mb-1">{p.category}</p>
+             <h3 class="text-3xl font-bold uppercase tracking-tighter">{p.title}</h3>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { engine } from '../../lib/engine';
+  import gsap from 'gsap';
+
+  // 3D Tilt Logic
+  const cards = document.querySelectorAll('.portfolio-card');
+  
+  cards.forEach(card => {
+    const el = card as HTMLElement;
+    
+    el.addEventListener('mousemove', (e) => {
+      const bounds = el.getBoundingClientRect();
+      const mouseX = e.clientX - bounds.left;
+      const mouseY = e.clientY - bounds.top;
+      
+      const xPercent = (mouseX / bounds.width - 0.5) * 2;
+      const yPercent = (mouseY / bounds.height - 0.5) * 2;
+      
+      const rotateX = -yPercent * 10;
+      const rotateY = xPercent * 10;
+      
+      gsap.to(el, {
+        rotateX: rotateX,
+        rotateY: rotateY,
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+    });
+    
+    el.addEventListener('mouseleave', () => {
+      gsap.to(el, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 0.8,
+        ease: 'elastic.out(1, 0.5)'
+      });
+    });
+  });
+</script>
+
+<style>
+  .portfolio-card {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+</style>

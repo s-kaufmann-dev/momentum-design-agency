@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description = "Momentum Design - High-End Digital Agency" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+        <script>
+            // Initialize Engine on Client
+            import { engine } from '../lib/engine';
+            
+            window.addEventListener('DOMContentLoaded', () => {
+                // Initial environment check
+                const hour = new Date().getHours();
+                const isNight = hour < 6 || hour > 20;
+                
+                if (isNight) {
+                    document.body.classList.add('night-theme');
+                    document.documentElement.style.setProperty('--bg', '#050505');
+                    document.documentElement.style.setProperty('--fg', '#dcdcdc');
+                } else if (hour > 10 && hour < 14) {
+                    // Noon sharpness
+                    document.documentElement.style.setProperty('--bg', '#ffffff');
+                    document.documentElement.style.setProperty('--fg', '#111111');
+                }
+            });
+        </script>
+	</head>
+	<body class="antialiased">
+		<slot />
+        <canvas id="webgl" aria-hidden="true" pointer-events="none"></canvas>
+	</body>
+</html>

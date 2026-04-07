@@ -1,0 +1,69 @@
+---
+---
+<div id="audio-overlay" class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[100] transition-opacity duration-1000 group">
+  <button id="unmute-btn" class="relative group cursor-pointer overflow-hidden p-8">
+    <span class="text-white text-4xl font-bold tracking-tighter uppercase group-hover:scale-110 transition-transform duration-500">MOMENTUM / ENTER</span>
+    <div class="absolute bottom-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-110 transition-transform duration-500 origin-left"></div>
+  </button>
+  <p class="text-white/40 mt-4 text-xs tracking-widest uppercase">Best experienced with audio</p>
+</div>
+
+<script>
+  import { Howl, Howler } from 'howler';
+  import { engine } from '../lib/engine';
+  import gsap from 'gsap';
+
+  const overlay = document.getElementById('audio-overlay');
+  const unmuteBtn = document.getElementById('unmute-btn');
+
+  if (overlay && unmuteBtn) {
+    unmuteBtn.addEventListener('click', () => {
+      // Initialize Audio
+      engine.enableAudio();
+      
+      // Global UI sounds
+      const hoverSound = new Howl({
+        src: ['https://cdn.pixabay.com/audio/2022/03/15/audio_73859600e5.mp3'], // Placeholder mechanical click
+        volume: 0.1,
+      });
+
+      const clickSound = new Howl({
+        src: ['https://cdn.pixabay.com/audio/2022/03/10/audio_5b306b677a.mp3'], // Heavy click
+        volume: 0.2,
+      });
+
+      // Background Ambient (Lowpass)
+      const ambient = new Howl({
+        src: ['https://cdn.pixabay.com/audio/2022/01/21/audio_0344d32f41.mp3'], // Abstract dark ambient
+        autoplay: true,
+        loop: true,
+        volume: 0.3,
+      });
+
+      // Attach sounds to global interactions
+      window.addEventListener('mousedown', () => {
+        if (engine.isAudioEnabled) clickSound.play();
+      });
+
+      const addHaptics = () => {
+        document.querySelectorAll('a, button, [data-magnetic]').forEach(el => {
+          el.addEventListener('mouseenter', () => {
+            if (engine.isAudioEnabled) hoverSound.play();
+          });
+        });
+      };
+
+      addHaptics();
+
+      // Fade out overlay
+      gsap.to(overlay, { 
+        opacity: 0, 
+        duration: 2, 
+        ease: 'power4.inOut',
+        onComplete: () => {
+          overlay.style.display = 'none';
+        }
+      });
+    });
+  }
+</script>
