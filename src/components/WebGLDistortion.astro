@@ -101,6 +101,7 @@
     };
 
     engine.subscribe(() => {
+      if (items.length === 0) return; // HUGE SAFARI CPU WIN: don't render a blank scene
       updatePlanes();
       renderer.render(scene, camera);
     });

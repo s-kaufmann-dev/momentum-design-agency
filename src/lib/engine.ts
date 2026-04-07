@@ -94,10 +94,7 @@ class Engine {
     this.mouse.vx = this.mouse.lx - prevLx;
     this.mouse.vy = this.mouse.ly - prevLy;
 
-    // Update Lenis
-    if (this.lenis) {
-      this.lenis.raf(time * 1000);
-    }
+    // Lenis is now updated by GSAP ticker in index.astro for perfect sync
 
     // Call subscribers
     for (const listener of this.listeners) {

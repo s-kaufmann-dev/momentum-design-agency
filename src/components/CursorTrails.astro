@@ -54,11 +54,13 @@
     resize();
 
     engine.subscribe((time, delta) => {
+      const velocity = Math.sqrt(engine.mouse.vx ** 2 + engine.mouse.vy ** 2);
+      
+      // HUGE Safari Optimization: only clear/draw if there's actually something to show
+      if (particles.length === 0 && velocity < 2) return;
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Add particle on movement
-      const velocity = Math.sqrt(engine.mouse.vx ** 2 + engine.mouse.vy ** 2);
       if (velocity > 2) {
         particles.push(new Particle(engine.mouse.x, engine.mouse.y, engine.mouse.vx, engine.mouse.vy));
       }

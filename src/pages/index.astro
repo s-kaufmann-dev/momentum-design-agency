@@ -76,7 +76,18 @@ import WebGLDistortion from '../components/WebGLDistortion.astro';
 <script>
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { engine } from '../lib/engine';
+  
   gsap.registerPlugin(ScrollTrigger);
+
+  // Sync GSAP with Lenis for butter-smooth non-laggy scrolling
+  if (engine.lenis) {
+    engine.lenis.on('scroll', ScrollTrigger.update);
+  }
+  gsap.ticker.add((time) => {
+    if (engine.lenis) engine.lenis.raf(time * 1000);
+  });
+  gsap.ticker.lagSmoothing(0);
 
   // Footer scroll typography
   const footerBg = document.getElementById('footer-bg');
