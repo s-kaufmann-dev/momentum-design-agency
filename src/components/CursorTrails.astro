@@ -10,6 +10,12 @@
 
   if (canvas && ctx) {
     let particles: Particle[] = [];
+    let themeColor = '#ff4d00'; // Default orange
+    
+    window.addEventListener('themeChanged', (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) themeColor = customEvent.detail;
+    });
 
     class Particle {
       x: number;
@@ -38,8 +44,10 @@
         if (ctx) {
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 77, 0, ${this.alpha * 0.5})`; // Momentum Orange
+          ctx.globalAlpha = Math.max(0, this.alpha * 0.5);
+          ctx.fillStyle = themeColor;
           ctx.fill();
+          ctx.globalAlpha = 1; // Reset for other drawings
         }
       }
     }

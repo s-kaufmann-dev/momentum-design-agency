@@ -4,8 +4,8 @@
   <!-- Organic WebGL particles background -->
   <div id="hero-particles" class="absolute inset-0 pointer-events-none opacity-30 z-0"></div>
 
-  <!-- Weather & Time Widget (Moved for mobile to avoid text overlap) -->
-  <div id="weather-widget" class="absolute top-4 right-4 md:top-8 md:right-8 z-10 text-right text-white/60 text-[9px] uppercase tracking-widest leading-loose">
+  <!-- Weather & Time Widget (Moved to bottom for mobile to strictly avoid text overlap) -->
+  <div id="weather-widget" class="absolute bottom-6 right-6 md:top-8 md:bottom-auto md:right-8 z-10 text-right text-white/60 text-[9px] uppercase tracking-widest leading-loose">
     <div id="time-display" class="text-xl md:text-2xl font-light text-white tracking-widest tabular-nums">--:--</div>
     <div id="date-display" class="mt-1"></div>
     <div id="weather-display" class="mt-1"></div>
@@ -198,6 +198,9 @@
     document.documentElement.style.setProperty('--bg', bg);
     document.documentElement.style.setProperty('--fg', fg);
     document.documentElement.style.setProperty('--accent', accent);
+    
+    // Broadcast the new accent color to Canvas components
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: accent }));
   }
 
   function updateClock() {
