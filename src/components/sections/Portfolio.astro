@@ -57,8 +57,10 @@ const projects = [
         <h3 id="modal-title" class="text-5xl font-black uppercase tracking-tighter leading-none mb-8 text-white">Title</h3>
         <p class="text-white/40 text-sm mb-6 leading-relaxed">Dieses Projekt definierte neue Branchenstandards durch eine kompromisslose Koppelung von Design und Technologie.</p>
         <div class="border-t border-white/10 pt-6">
-          <p class="text-white/20 text-[9px] uppercase tracking-widest mb-2">Key Metrics</p>
-          <p id="modal-metrics" class="text-accent text-sm font-bold tracking-wider">Metrics go here</p>
+          <p class="text-white/20 text-[9px] uppercase tracking-widest mb-4">Key Metrics</p>
+          <div id="modal-metrics" class="text-accent text-sm font-bold tracking-wider space-y-2 flex flex-col">
+            <!-- Dynamically populated vertical metrics list -->
+          </div>
         </div>
       </div>
     </div>
@@ -173,8 +175,10 @@ const projects = [
       
       document.getElementById('modal-title')!.textContent = el.dataset.title || '';
       document.getElementById('modal-cat')!.textContent = el.dataset.cat || '';
-      document.getElementById('modal-metrics')!.textContent = el.dataset.metrics || '';
       (document.getElementById('modal-img') as HTMLImageElement).src = el.dataset.img || '';
+
+      const metricsArr = (el.dataset.metrics || '').split('|');
+      document.getElementById('modal-metrics')!.innerHTML = metricsArr.map(m => `<div>→ ${m.trim()}</div>`).join('');
 
       if (modal && content) {
         modal.classList.remove('opacity-0', 'pointer-events-none');
