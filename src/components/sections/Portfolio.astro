@@ -34,10 +34,33 @@ const projects = [
     img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop",
     year: "2024",
     size: "col-span-1 row-span-1",
-    result: "+520% Umsatz"
+    result: "+520% Umsatz",
+    metrics: "Bounce Rate: -40% | Session Duration: +2m | AOV: +15%"
   },
 ];
 ---
+<!-- Project Details Modal -->
+<div id="project-modal" class="fixed inset-0 z-[9999] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 bg-black/90 backdrop-blur-md">
+  <div class="relative w-full max-w-4xl bg-[#090909] border border-white/10 p-12 transform translate-y-10 scale-95 transition-all duration-700" id="modal-content">
+    <button id="close-modal" class="absolute top-6 right-6 text-white/50 hover:text-accent transition-colors text-[9px] uppercase tracking-widest cursor-pointer group" data-magnetic>
+      Schließen <span class="block w-0 group-hover:w-full h-px bg-accent transition-all duration-500 mt-1"></span>
+    </button>
+    <div class="flex flex-col md:flex-row gap-12 items-center">
+      <div class="w-full md:w-1/2 aspect-video overflow-hidden">
+        <img id="modal-img" src="" class="w-full h-full object-cover grayscale opacity-80" alt="Project image" />
+      </div>
+      <div class="w-full md:w-1/2">
+        <p id="modal-cat" class="text-accent text-[9px] uppercase tracking-[0.5em] mb-4">Category</p>
+        <h3 id="modal-title" class="text-5xl font-black uppercase tracking-tighter leading-none mb-8 text-white">Title</h3>
+        <p class="text-white/40 text-sm mb-6 leading-relaxed">Dieses Projekt definierte neue Branchenstandards durch eine kompromisslose Koppelung von Design und Technologie.</p>
+        <div class="border-t border-white/10 pt-6">
+          <p class="text-white/20 text-[9px] uppercase tracking-widest mb-2">Key Metrics</p>
+          <p id="modal-metrics" class="text-accent text-sm font-bold tracking-wider">Metrics go here</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <section id="portfolio" class="bg-[#050505] py-48 min-h-screen relative overflow-hidden">
   <!-- Background scroll typography -->
   <div id="portfolio-bg-text" class="absolute inset-0 flex items-center pointer-events-none overflow-hidden z-0">
@@ -64,7 +87,11 @@ const projects = [
         <div
           class={`portfolio-card group relative cursor-pointer overflow-hidden bg-neutral-900 ${p.size}`}
           data-magnetic
-          data-magnetic-label={p.category}
+          data-magnetic-label="Details"
+          data-title={p.title}
+          data-cat={p.category}
+          data-img={p.img}
+          data-metrics={p.metrics || p.result}
         >
           <!-- Image with clip-path reveal + grayscale hover -->
           <div class="image-reveal absolute inset-0">
@@ -129,11 +156,47 @@ const projects = [
       const b = el.getBoundingClientRect();
       const x = ((e.clientX - b.left) / b.width - 0.5) * 2;
       const y = ((e.clientY - b.top) / b.height - 0.5) * 2;
-      gsap.to(el, { rotateX: -y * 14, rotateY: x * 14, scale: 1.02, duration: 0.6, ease: 'power2.out' });
+      // Reduced rotate values from 14 to 3 for less 'massive' laggy movement
+      gsap.to(el, { rotateX: -y * 3, rotateY: x * 3, scale: 1.01, duration: 0.8, ease: 'power2.out' });
     });
     el.addEventListener('mouseleave', () => {
       gsap.to(el, { rotateX: 0, rotateY: 0, scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.5)' });
     });
+
+    // ─── Modal Click Handler ───────────────────────────────────────
+    el.addEventListener('click', () => {
+      const modal = document.getElementById('project-modal');
+      const content = document.getElementById('modal-content');
+      
+      document.getElementById('modal-title')!.textContent = el.dataset.title || '';
+      document.getElementById('modal-cat')!.textContent = el.dataset.cat || '';
+      document.getElementById('modal-metrics')!.textContent = el.dataset.metrics || '';
+      (document.getElementById('modal-img') as HTMLImageElement).src = el.dataset.img || '';
+
+      if (modal && content) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+        content.classList.remove('translate-y-10', 'scale-95');
+        content.classList.add('translate-y-0', 'scale-100');
+      }
+    });
+  });
+
+  // ─── Close Modal ───────────────────────────────────────────────
+  const closeModal = () => {
+    const modal = document.getElementById('project-modal');
+    const content = document.getElementById('modal-content');
+    if (modal && content) {
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.remove('translate-y-0', 'scale-100');
+      content.classList.add('translate-y-10', 'scale-95');
+    }
+  };
+
+  document.getElementById('close-modal')?.addEventListener('click', closeModal);
+  document.getElementById('project-modal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('project-modal')) closeModal();
   });
 </script>
 
@@ -141,6 +204,6 @@ const projects = [
   .portfolio-card {
     perspective: 1500px;
     transform-style: preserve-3d;
-    will-change: transform;
+    transform: translateZ(0); /* Force HW without will-change lag */
   }
 </style>
