@@ -4,9 +4,9 @@
   <!-- Organic WebGL particles background -->
   <div id="hero-particles" class="absolute inset-0 pointer-events-none opacity-30 z-0"></div>
 
-  <!-- Weather & Time Widget (top right) -->
-  <div id="weather-widget" class="absolute top-8 right-8 z-10 text-right text-white/40 text-[9px] uppercase tracking-widest leading-loose">
-    <div id="time-display" class="text-2xl font-light text-white/70 tracking-widest tabular-nums">--:--</div>
+  <!-- Weather & Time Widget (Moved for mobile to avoid text overlap) -->
+  <div id="weather-widget" class="absolute top-4 right-4 md:top-8 md:right-8 z-10 text-right text-white/60 text-[9px] uppercase tracking-widest leading-loose">
+    <div id="time-display" class="text-xl md:text-2xl font-light text-white tracking-widest tabular-nums">--:--</div>
     <div id="date-display" class="mt-1"></div>
     <div id="weather-display" class="mt-1"></div>
     <div id="temp-display"></div>
@@ -153,10 +153,57 @@
   const dateEl = document.getElementById('date-display');
   const weatherEl = document.getElementById('weather-display');
   const tempEl = document.getElementById('temp-display');
+  
+  let currentHour = new Date().getHours();
+  let currentWeatherCode = 0; // default sunny
+
+  function updateTheme() {
+    // 1. Time based Background and Foreground Colors
+    let bg = '#050505';
+    let fg = '#f5f5f5';
+    
+    if (currentHour >= 6 && currentHour < 12) {
+      // Morgens (Morning): Soft warm dark
+      bg = '#0f0c0a'; fg = '#fcf5f0';
+    } else if (currentHour >= 12 && currentHour < 15) {
+      // Mittags (Noon): Neutral dark
+      bg = '#111111'; fg = '#ffffff';
+    } else if (currentHour >= 15 && currentHour < 18) {
+      // Nachmittags (Afternoon): Slightly warmer
+      bg = '#120d0b'; fg = '#fdf4f0';
+    } else if (currentHour >= 18 && currentHour < 22) {
+      // Abends (Evening): Purplish dark
+      bg = '#0b0b12'; fg = '#f0f0fc';
+    } else {
+      // Nachts (Night): Deep black
+      bg = '#030303'; fg = '#e0e0e0';
+    }
+
+    // 2. Weather based Accent Color
+    let accent = '#ff4d00'; // default sunny
+    const code = currentWeatherCode;
+    
+    if (code === 0 || code === 1) {
+      accent = '#ff4d00'; // Sonnig - vibrant orange
+    } else if (code === 2 || code === 3 || code === 45 || code === 48) {
+      accent = '#8a94a6'; // Bewölkt / Nebel - soft blue gray
+    } else if (code >= 51 && code <= 65) {
+      accent = '#2563eb'; // Regen - deep blue
+    } else if (code >= 71 && code <= 77) {
+      accent = '#bae6fd'; // Schnee - ice blue
+    } else if (code >= 80 && code <= 99) {
+      accent = '#8b5cf6'; // Hagel / Gewitter / Schauer - electric purple
+    }
+
+    document.documentElement.style.setProperty('--bg', bg);
+    document.documentElement.style.setProperty('--fg', fg);
+    document.documentElement.style.setProperty('--accent', accent);
+  }
 
   function updateClock() {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
+    currentHour = now.getHours();
+    const h = String(currentHour).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     if (timeEl) timeEl.textContent = `${h}:${m}:${s}`;
@@ -164,6 +211,9 @@
     const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
     const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
     if (dateEl) dateEl.textContent = `${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]}`;
+    
+    // Update theme hourly if needed, normally hour changes will naturally trigger here
+    updateTheme();
   }
 
   setInterval(updateClock, 1000);
@@ -174,29 +224,22 @@
     try {
       const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.22&longitude=6.77&current_weather=true&temperature_unit=celsius');
       const data = await res.json();
-      const code = data?.current_weather?.weathercode;
+      currentWeatherCode = data?.current_weather?.weathercode || 0;
       const temp = data?.current_weather?.temperature;
       const windspeed = data?.current_weather?.windspeed;
 
       const weatherCodes: Record<number, string> = {
-        0: 'Klar', 1: 'Meist klar', 2: 'Teils bewölkt', 3: 'Bedeckt',
-        45: 'Nebel', 48: 'Reifnebel', 51: 'Leichter Nieselregen', 53: 'Nieselregen', 55: 'Starker Niedersch.',
-        61: 'Leichter Regen', 63: 'Regen', 65: 'Starker Regen', 71: 'Leichter Schneefall', 73: 'Schneefall',
-        80: 'Leichte Schauer', 81: 'Schauer', 82: 'Starke Schauer', 95: 'Gewitter',
+        0: 'Sonnig', 1: 'Meist sonnig', 2: 'Teils bewölkt', 3: 'Bedeckt',
+        45: 'Nebel', 48: 'Reifnebel', 51: 'Leichter Nieselregen', 53: 'Nieselregen', 55: 'Starker Nieselregen',
+        61: 'Leichter Regen', 63: 'Regen', 65: 'Starker Regen', 71: 'Leichter Schneefall', 73: 'Schneefall', 77: 'Schnee',
+        80: 'Leichte Schauer', 81: 'Schauer', 82: 'Starke Schauer', 95: 'Gewitter', 96: 'Hagel', 99: 'Starker Hagel'
       };
 
-      const label = weatherCodes[code] || 'Unbekannt';
+      const label = weatherCodes[currentWeatherCode] || 'Unbekannt';
       if (weatherEl) weatherEl.textContent = `${label}`;
       if (tempEl) tempEl.textContent = `${temp}°C / Wind ${windspeed} km/h`;
 
-      // Apply dynamic CSS variables based on weather
-      if (code === 0 || code === 1) {
-        document.documentElement.style.setProperty('--accent', '#ff4d00'); // Clear → orange
-      } else if (code >= 61 && code <= 65) {
-        document.documentElement.style.setProperty('--accent', '#4da6ff'); // Rain → blue
-      } else if (code >= 71 && code <= 73) {
-        document.documentElement.style.setProperty('--accent', '#a0cfff'); // Snow → ice blue
-      }
+      updateTheme();
     } catch { /* fail silently */ }
   }
 

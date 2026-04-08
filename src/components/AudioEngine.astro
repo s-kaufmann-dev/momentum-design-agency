@@ -217,8 +217,15 @@
 
   // ─── Button click handler ─────────────────────────────────────────
   if (unmuteBtn) {
-    unmuteBtn.addEventListener('click', (e) => {
+    const startExperience = (e: Event) => {
       e.stopPropagation();
+      e.preventDefault(); // Prevent double firing from touch + click
+      
+      // Force unlock global audio context on mobile
+      if (Howler && Howler.ctx && Howler.ctx.state !== 'running') {
+        Howler.ctx.resume();
+      }
+
       engine.enableAudio();
       initAudio();
 
@@ -239,7 +246,14 @@
           }
         }
       });
-    });
+      
+      // Clean up listeners
+      unmuteBtn.removeEventListener('click', startExperience);
+      unmuteBtn.removeEventListener('touchstart', startExperience);
+    };
+
+    unmuteBtn.addEventListener('click', startExperience);
+    unmuteBtn.addEventListener('touchstart', startExperience, { passive: false });
   }
 </script>
 
