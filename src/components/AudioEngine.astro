@@ -31,6 +31,21 @@
   </div>
 </div>
 
+<!-- Floating Sound Toggle Button -->
+<button 
+  id="floating-sound-toggle" 
+  class="fixed bottom-8 right-8 z-[9000] text-accent text-[9px] uppercase tracking-[0.3em] opacity-0 pointer-events-none transition-opacity duration-1000 flex items-center gap-2"
+  style="pointer-events:none;"
+  data-magnetic
+>
+  <span id="sound-status">SOUND: ON</span>
+  <div class="flex gap-[2px] items-end h-2" id="sound-bars">
+    <div class="w-1 bg-accent h-full animate-[bounce_1s_ease-in-out_infinite_alternate]"></div>
+    <div class="w-1 bg-accent h-1/2 animate-[bounce_1.2s_ease-in-out_infinite_alternate]"></div>
+    <div class="w-1 bg-accent h-3/4 animate-[bounce_0.8s_ease-in-out_infinite_alternate]"></div>
+  </div>
+</button>
+
 <script>
   import { Howl, Howler } from 'howler';
   import { engine } from '../lib/engine';
@@ -115,17 +130,27 @@
         pannerNode.pan.setTargetAtTime(norm * 0.35, audioCtx.currentTime, 0.3);
       });
 
-      // ─── Scroll-driven lowpass soundscape ───────────────────────
+      // ─── Scroll-driven volume fade out + filter ───────────────────
       ScrollTrigger.create({
         start: 0,
         end: 'max',
         onUpdate: (self) => {
-          if (!lowpassFilter || !audioCtx || audioCtx.state !== 'running') return;
+          if (!lowpassFilter || !audioCtx || audioCtx.state !== 'running' || !ambientSound) return;
           const p = self.progress;
+          
+          // Filter mapping
           const freq = p < 0.5
             ? 20000 - p * 2 * 15000
             : 5000 + (p - 0.5) * 2 * 15000;
           lowpassFilter.frequency.setTargetAtTime(Math.max(500, freq), audioCtx.currentTime, 0.4);
+
+          // Volume fade out at the very bottom (last 10% of scroll)
+          if (p > 0.9 && engine.isAudioEnabled) {
+            const fadeFactor = 1 - ((p - 0.9) * 10); // 1 to 0
+            ambientSound.volume(0.2 * Math.max(0, fadeFactor));
+          } else if (engine.isAudioEnabled && ambientSound.volume() < 0.2) {
+             ambientSound.volume(0.2); // Restore volume
+          }
         }
       });
 
@@ -139,6 +164,29 @@
           if (engine.isAudioEnabled && hoverSound) hoverSound.play();
         });
       });
+
+      // ─── Sound Toggle Logic ──────────────────────────────────────
+      const floatingToggle = document.getElementById('floating-sound-toggle');
+      const soundStatus = document.getElementById('sound-status');
+      const soundBars = document.getElementById('sound-bars');
+      
+      if (floatingToggle && soundStatus && soundBars) {
+        floatingToggle.addEventListener('click', () => {
+          engine.isAudioEnabled = !engine.isAudioEnabled;
+          if (engine.isAudioEnabled) {
+             Howler.mute(false);
+             if (ambientSound) ambientSound.volume(0.2);
+             soundStatus.textContent = 'SOUND: ON';
+             soundBars.style.opacity = '1';
+             if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+          } else {
+             Howler.mute(true);
+             if (ambientSound) ambientSound.volume(0);
+             soundStatus.textContent = 'SOUND: OFF';
+             soundBars.style.opacity = '0.3';
+          }
+        });
+      }
 
     } catch(err) {
       console.error('Audio init error:', err);
@@ -181,6 +229,14 @@
         onComplete: () => {
           overlay.style.display = 'none';
           overlay.style.pointerEvents = 'none';
+          
+          // Show the floating sound toggle button
+          const floatingToggle = document.getElementById('floating-sound-toggle');
+          if (floatingToggle) {
+             floatingToggle.classList.remove('opacity-0');
+             floatingToggle.classList.add('opacity-100');
+             floatingToggle.style.pointerEvents = 'auto';
+          }
         }
       });
     });

@@ -7,7 +7,8 @@ const projects = [
     img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
     year: "2025",
     size: "col-span-2 row-span-2",
-    result: "+340% Conversion"
+    result: "+340% Conversion",
+    metrics: "Conversion-Rate: +340% | Lead-Steigerung: +120% | Traffic: +18M Session"
   },
   {
     title: "Lyra Studio",
@@ -16,7 +17,8 @@ const projects = [
     img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop",
     year: "2025",
     size: "col-span-1 row-span-1",
-    result: "+180% Traffic"
+    result: "+180% Traffic",
+    metrics: "User Engagement: +280% | Organic Traffic: +180% | Bounce Rate: -55%"
   },
   {
     title: "Cipher",
@@ -25,7 +27,8 @@ const projects = [
     img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800&auto=format&fit=crop",
     year: "2024",
     size: "col-span-1 row-span-2",
-    result: "Cannes Lions"
+    result: "Cannes Lions",
+    metrics: "Awards: 3x Gold | Verweildauer: +4m 20s | Interaktionsrate: +89%"
   },
   {
     title: "Elysium",
@@ -35,12 +38,12 @@ const projects = [
     year: "2024",
     size: "col-span-1 row-span-1",
     result: "+520% Umsatz",
-    metrics: "Bounce Rate: -40% | Session Duration: +2m | AOV: +15%"
+    metrics: "Umsatz: +520% | Cart Abandonment: -65% | AOV Basket: +35%"
   },
 ];
 ---
 <!-- Project Details Modal -->
-<div id="project-modal" class="fixed inset-0 z-[9999] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 bg-black/90 backdrop-blur-md">
+<div id="project-modal" class="fixed inset-0 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 bg-black/90 backdrop-blur-md" style="z-index: 99990;">
   <div class="relative w-full max-w-4xl bg-[#090909] border border-white/10 p-12 transform translate-y-10 scale-95 transition-all duration-700" id="modal-content">
     <button id="close-modal" class="absolute top-6 right-6 text-white/50 hover:text-accent transition-colors text-[9px] uppercase tracking-widest cursor-pointer group" data-magnetic>
       Schließen <span class="block w-0 group-hover:w-full h-px bg-accent transition-all duration-500 mt-1"></span>
@@ -95,7 +98,7 @@ const projects = [
         >
           <!-- Image with clip-path reveal + grayscale hover -->
           <div class="image-reveal absolute inset-0">
-            <div class="image-inner absolute inset-0 transition-transform duration-[1.2s] group-hover:scale-110">
+            <div class="image-inner absolute inset-0 transition-transform duration-[1.2s] group-hover:scale-105">
               <img src={p.img} alt={p.title} class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter] duration-[1.5s]" crossorigin="anonymous" />
             </div>
             <!-- Glassmorphism reflection -->
@@ -156,8 +159,8 @@ const projects = [
       const b = el.getBoundingClientRect();
       const x = ((e.clientX - b.left) / b.width - 0.5) * 2;
       const y = ((e.clientY - b.top) / b.height - 0.5) * 2;
-      // Reduced rotate values from 14 to 3 for less 'massive' laggy movement
-      gsap.to(el, { rotateX: -y * 3, rotateY: x * 3, scale: 1.01, duration: 0.8, ease: 'power2.out' });
+      // Further reduced rotate values down to 2 and disable scale for minimal subtle movement
+      gsap.to(el, { rotateX: -y * 2, rotateY: x * 2, scale: 1.0, duration: 0.8, ease: 'power2.out' });
     });
     el.addEventListener('mouseleave', () => {
       gsap.to(el, { rotateX: 0, rotateY: 0, scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.5)' });
