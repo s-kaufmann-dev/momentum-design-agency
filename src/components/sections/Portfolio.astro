@@ -185,6 +185,15 @@ const projects = [
         modal.classList.add('opacity-100', 'pointer-events-auto');
         content.classList.remove('translate-y-10', 'scale-95');
         content.classList.add('translate-y-0', 'scale-100');
+
+        // Show standard white cursor
+        document.documentElement.style.setProperty('cursor', 'auto', 'important');
+        const co = document.getElementById('cursor-outer');
+        const cd = document.getElementById('cursor-dot');
+        const cl = document.getElementById('cursor-label');
+        if (co) co.style.display = 'none';
+        if (cd) cd.style.display = 'none';
+        if (cl) cl.style.display = 'none';
       }
     });
   });
@@ -198,6 +207,15 @@ const projects = [
       modal.classList.add('opacity-0', 'pointer-events-none');
       content.classList.remove('translate-y-0', 'scale-100');
       content.classList.add('translate-y-10', 'scale-95');
+
+      // Hide standard cursor, restore custom cursor
+      document.documentElement.style.setProperty('cursor', 'none', 'important');
+      const co = document.getElementById('cursor-outer');
+      const cd = document.getElementById('cursor-dot');
+      const cl = document.getElementById('cursor-label');
+      if (co) co.style.display = 'block';
+      if (cd) cd.style.display = 'block';
+      if (cl) cl.style.display = 'block';
     }
   };
 
